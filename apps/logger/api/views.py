@@ -1,45 +1,34 @@
-import datetime
+import django_filters
 
-from django.utils import timezone
-from rest_framework.response import Response
-from rest_framework.views import APIView
+from rest_framework import filters
+from rest_framework import generics
+from rest_framework.generics import get_object_or_404
 
-from apps.logger.models import ElectricityUsedReading, GasReading, \
-    AGGREGATE_HOUR
-
-
-class ElectricityUsageActual(APIView):
-
-    def get(self, request, format=None):
-
-        return Response(ElectricityUsedReading.reports.actual())
+from apps.logger.api.serializers import ReadingReportSerializer
+from apps.logger.models import PowerMeter, Reading
 
 
-class ElectricityUsageTotal(APIView):
+class ReadingReportFilter(filters.FilterSet):
+    datetime_start = django_filters.DateTimeFilter(
+        name='datetime',
+        lookup_expr='gte'
+    )
+    datetime_end = django_filters.DateTimeFilter(
+        name='datetime',
+        lookup_expr='lt'
+    )
 
-    def get(self, request, format=None):
-        end = timezone.now()
-        start = end - datetime.timedelta(days=1)
-
-        return Response(
-            ElectricityUsedReading.reports.used(
-                start=start,
-                end=end,
-                aggregate_by=AGGREGATE_HOUR
-            )
-        )
+    class Meta:
+        model = Reading
+        fields = ['datetime']
 
 
-class GasUsageTotal(APIView):
+class ReadingReportView(generics.ListAPIView):
+    serializer_class = ReadingReportSerializer
+    filter_backends = (filters.DjangoFilterBackend,)
+    filter_class = ReadingReportFilter
 
-    def get(self, request, format=None):
-        end = timezone.now()
-        start = end - datetime.timedelta(days=1)
+    def get_queryset(self):
+        meter = get_object_or_404(PowerMeter, pk=self.kwargs['meter_id'])
 
-        return Response(
-            GasReading.reports.used(
-                start=start,
-                end=end,
-                aggregate_by=AGGREGATE_HOUR
-            )
-        )
+        return meter.readings.datetime_aggregate(self.kwargs['aggregate'])

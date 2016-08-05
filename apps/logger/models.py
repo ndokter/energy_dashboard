@@ -1,110 +1,77 @@
-from django.db import models, connection
+from django.db import connections, models
+from django.db.models.aggregates import Sum
+from django.utils.translation import ugettext as _
 
 
-AGGREGATE_YEAR = 'year'
-AGGREGATE_MONTH = 'month'
-AGGREGATE_DAY = 'day'
-AGGREGATE_HOUR = 'hour'
-AGGREGATE_MINUTE = 'minute'
+class PowerMeter(models.Model):
+    UNIT_KWH = 'kwh'
+    UNIT_M3 = 'm3'
 
-AGGREGATES = {
-    AGGREGATE_YEAR: '%%Y-01-01T00:00:00',
-    AGGREGATE_MONTH: '%%Y-%%m-01T00:00:00',
-    AGGREGATE_DAY: '%%Y-%%m-%%dT00:00:00',
-    AGGREGATE_HOUR: '%%Y-%%m-%%dT%%H:00:00',
-    AGGREGATE_MINUTE: '%%Y-%%m-%%dT%%H:%%M:00'
-}
+    UNITS = (
+        (UNIT_KWH, _('Kilowatt hour')),
+        (UNIT_M3, _('Cubic meter'))
+    )
+
+    name = models.CharField(max_length=255)
+    unit = models.CharField(choices=UNITS, max_length=10)
+
+
+class ReadingReportsQuerySet(models.QuerySet):
+    SECOND = 'second'
+    MINUTE = 'minute'
+    HOUR = 'hour'
+    DAY = 'day'
+    MONTH = 'month'
+    YEAR = 'year'
+
+    AGGREGATES = {
+        SECOND: "strftime('%%Y-%%m-%%dT%%H:%%M:%%S', datetime)",
+        MINUTE: "strftime('%%Y-%%m-%%dT%%H:%%M:00', datetime)",
+        HOUR: "strftime('%%Y-%%m-%%dT%%H:00:00', datetime)",
+        DAY: "strftime('%%Y-%%m-%%dT00:00:00', datetime)",
+        MONTH: "strftime('%%Y-%%m-01T00:00:00', datetime)",
+        YEAR: "strftime('%%Y-01-01T00:00:00', datetime)",
+    }
+
+    def datetime_aggregate(self, aggregate):
+
+        return self\
+            .extra(select={'datetime__aggregate': self.AGGREGATES[aggregate]})\
+            .values('datetime__aggregate')\
+            .annotate(Sum('value_increment'))
+
+    @property
+    def _engine(self):
+        return connections.databases[self.db]['ENGINE']
 
 
 class Reading(models.Model):
-    objects = models.Manager()
+    objects = ReadingReportsQuerySet.as_manager()
 
-    datetime = models.DateTimeField(unique=True)
+    power_meter = models.ForeignKey(
+        'logger.PowerMeter',
+        related_name='readings',
+        db_index=True
+    )
+    datetime = models.DateTimeField(db_index=True)
+    value_increment = models.FloatField()
+    value_total = models.FloatField(db_index=True)
 
     class Meta:
-        abstract = True
+        db_table = 'reading'
 
+    def save(self, **kwargs):
 
-class ElectricityReportsQuerySet(models.QuerySet):
+        # Calculate the increment from the previous record.
+        last_record = Reading.objects\
+            .filter(power_meter=self.power_meter)\
+            .order_by('datetime')\
+            .last()
 
-    def actual(self):
-        return getattr(self.last(), 'actual', None)
+        if last_record:
+            self.value_increment = \
+                self.value_total - last_record.value_total
+        else:
+            self.value_increment = 0
 
-
-class ElectricityUsedReportsQuerySet(ElectricityReportsQuerySet):
-
-    def used(self, start, end, aggregate_by, split_tariff=False):
-        cursor = connection.cursor()
-
-        query = """
-            SELECT strftime('{aggregate}', r.datetime) AS start,
-                   CAST(
-                       printf("%%.2f", SUM(r_next.total-r.total))
-                       AS FLOAT
-                   ) AS delta
-                   {tariff}
-            FROM logger_electricityusedreading r
-            INNER JOIN logger_electricityusedreading AS r_next
-                ON  r.id + 1 = r_next.id
-                AND r.tariff = r_next.tariff
-                AND r_next.datetime <= Datetime(%s)
-            WHERE r.datetime >= Datetime(%s)
-            GROUP BY start{tariff}
-            ORDER BY start
-        """.format(aggregate=AGGREGATES[aggregate_by],
-                   tariff=', r.tariff' if split_tariff else '')
-
-        query_parameters = [end.strftime('%Y-%m-%d %H:%M:%S'),
-                            start.strftime('%Y-%m-%d %H:%M:%S')]
-
-        cursor.execute(query, query_parameters)
-
-        return cursor.fetchall()
-
-
-class GasUsedReportsQuerySet(models.QuerySet):
-
-    def used(self, start, end, aggregate_by):
-        cursor = connection.cursor()
-
-        query = """
-            SELECT strftime('{aggregate}', r.datetime) AS start,
-                   CAST(
-                       printf("%%.2f", SUM(r_next.total-r.total))
-                       AS FLOAT
-                   ) AS delta
-            FROM logger_gasreading r
-            INNER JOIN logger_gasreading AS r_next
-                ON  r.id + 1 = r_next.id
-                AND r_next.datetime <= Datetime(%s)
-            WHERE r.datetime >= Datetime(%s)
-            GROUP BY start
-            ORDER BY start
-        """.format(aggregate=AGGREGATES[aggregate_by])
-
-        query_parameters = [end.strftime('%Y-%m-%d %H:%M:%S'),
-                            start.strftime('%Y-%m-%d %H:%M:%S')]
-
-        cursor.execute(query, query_parameters)
-
-        return cursor.fetchall()
-
-
-class ElectricityUsedReading(Reading):
-    reports = ElectricityUsedReportsQuerySet.as_manager()
-
-    tariff = models.SmallIntegerField(db_index=True)
-    total = models.FloatField()
-    actual = models.FloatField()
-
-
-class ElectricityDeliveredReading(Reading):
-    tariff = models.SmallIntegerField(db_index=True)
-    total = models.FloatField()
-    actual = models.FloatField()
-
-
-class GasReading(Reading):
-    reports = GasUsedReportsQuerySet.as_manager()
-
-    total = models.FloatField()
+        super(Reading, self).save(**kwargs)

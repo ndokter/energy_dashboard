@@ -1,4 +1,5 @@
 django==1.9.4
 djangorestframework==3.3.3
 gunicorn==19.4.5
+django-filter==0.13
 git+git://github.com/ndokter/dsmr_reader.git
