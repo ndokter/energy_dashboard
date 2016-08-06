@@ -30,8 +30,8 @@ class Meter(models.Model):
         )[0]
 
     @staticmethod
-    def get_gas_meter(tariff):
+    def get_gas_meter():
         return Meter.objects.get_or_create(
-            name='electricity_used_t{}'.format(tariff),
-            unit=Meter.UNIT_KWH
+            name='gas',
+            unit=Meter.UNIT_M3
         )[0]
