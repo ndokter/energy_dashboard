@@ -19,6 +19,7 @@ class Command(BaseCommand):
             message_datetime = telegram[P1_MESSAGE_TIMESTAMP]
 
             tariff = telegram[ELECTRICITY_ACTIVE_TARIFF]
+            tariff = int(tariff)
 
             electricity_used_total \
                 = telegram[ELECTRICITY_USED_TARIFF_ALL[tariff - 1]]
@@ -30,14 +31,14 @@ class Command(BaseCommand):
             Meter.register_electricity_used(
                 value_total=electricity_used_total.value,
                 datetime=message_datetime.value,
-                tariff=tariff.value
+                tariff=tariff
             )
 
             if electricity_delivered_total.value:
                 Meter.register_electricity_delivered(
                     value_total=electricity_delivered_total.value,
                     datetime=message_datetime.value,
-                    tariff=tariff.value
+                    tariff=tariff
                 )
 
             is_new_gas_reading = not Meter.get_gas_meter().readings\
