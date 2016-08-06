@@ -13,11 +13,7 @@ class Command(BaseCommand):
         parser.add_argument('device', type=str)
 
     def handle(self, *args, **options):
-
-        meter_gas = Meter.objects.get_or_create(
-            name='gas',
-            unit=Meter.UNIT_M3
-        )[0]
+        meter_gas = Meter.get_gas_meter()
 
         serial_reader = DSMR4SerialReader(options['device'])
 
@@ -27,11 +23,6 @@ class Command(BaseCommand):
             tariff = telegram[ELECTRICITY_ACTIVE_TARIFF]
             tariff = int(tariff.value)
 
-            electricity_used_meter = Meter.objects.get_or_create(
-                name='electricity_used_t{}'.format(tariff),
-                unit=Meter.UNIT_KWH
-            )[0]
-
             electricity_used_total \
                 = telegram[ELECTRICITY_USED_TARIFF_ALL[tariff - 1]]
             electricity_delivered_total = \
@@ -39,20 +30,20 @@ class Command(BaseCommand):
 
             gas_reading = telegram[HOURLY_GAS_METER_READING]
 
+            electricity_used_meter = Meter.get_electricity_used_meter(tariff)
             electricity_used_meter.readings.create(
                 value_total=electricity_used_total.value,
                 datetime=message_datetime.value
             )
 
             if electricity_delivered_total.value:
-                electricity_delivered_meter = Meter.objects.get_or_create(
-                    name='electricity_delivered_t{}'.format(tariff),
-                    unit=Meter.UNIT_KWH
-                )[0]
+                electricity_delivered_meter = \
+                    Meter.get_electricity_delivered_meter(tariff)
 
                 electricity_delivered_meter.readings.create(
                     value_total=electricity_delivered_total.value,
-                    datetime=message_datetime.value)
+                    datetime=message_datetime.value
+                )
 
             is_new_gas_reading = not meter_gas.readings\
                 .filter(datetime__gte=gas_reading.datetime) \
