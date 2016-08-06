@@ -13,15 +13,12 @@ class Command(BaseCommand):
         parser.add_argument('device', type=str)
 
     def handle(self, *args, **options):
-        meter_gas = Meter.get_gas_meter()
-
         serial_reader = DSMR4SerialReader(options['device'])
 
         for telegram in serial_reader.read():
             message_datetime = telegram[P1_MESSAGE_TIMESTAMP]
 
             tariff = telegram[ELECTRICITY_ACTIVE_TARIFF]
-            tariff = int(tariff.value)
 
             electricity_used_total \
                 = telegram[ELECTRICITY_USED_TARIFF_ALL[tariff - 1]]
@@ -30,27 +27,25 @@ class Command(BaseCommand):
 
             gas_reading = telegram[HOURLY_GAS_METER_READING]
 
-            electricity_used_meter = Meter.get_electricity_used_meter(tariff)
-            electricity_used_meter.readings.create(
+            Meter.register_electricity_used(
                 value_total=electricity_used_total.value,
-                datetime=message_datetime.value
+                datetime=message_datetime.value,
+                tariff=tariff.value
             )
 
             if electricity_delivered_total.value:
-                electricity_delivered_meter = \
-                    Meter.get_electricity_delivered_meter(tariff)
-
-                electricity_delivered_meter.readings.create(
+                Meter.register_electricity_delivered(
                     value_total=electricity_delivered_total.value,
-                    datetime=message_datetime.value
+                    datetime=message_datetime.value,
+                    tariff=tariff.value
                 )
 
-            is_new_gas_reading = not meter_gas.readings\
+            is_new_gas_reading = not Meter.get_gas_meter().readings\
                 .filter(datetime__gte=gas_reading.datetime) \
                 .exists()
 
             if is_new_gas_reading:
-                meter_gas.readings.create(
+                Meter.register_gas_used(
                     value_total=gas_reading.value,
                     datetime=gas_reading.datetime
                 )

@@ -35,3 +35,30 @@ class Meter(models.Model):
             name='gas',
             unit=Meter.UNIT_M3
         )[0]
+
+    @staticmethod
+    def register_electricity_used(value_total, datetime, tariff):
+        meter = Meter.get_electricity_used_meter(tariff)
+
+        return meter.readings.create(
+            value_total=value_total,
+            datetime=datetime
+        )
+
+    @staticmethod
+    def register_electricity_delivered(value_total, datetime, tariff):
+        meter = Meter.get_electricity_delivered_meter(tariff)
+
+        return meter.readings.create(
+            value_total=value_total,
+            datetime=datetime
+        )
+
+    @staticmethod
+    def register_gas_used(value_total, datetime):
+        meter = Meter.get_gas_meter()
+
+        return meter.readings.create(
+            value_total=value_total,
+            datetime=datetime
+        )
