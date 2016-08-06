@@ -1,6 +1,6 @@
 from django.core.management import BaseCommand
 
-from apps.logger.models import PowerMeter
+from apps.logger.models import Meter
 from dsmr_reader.obis_references import P1_MESSAGE_TIMESTAMP, \
     ELECTRICITY_ACTIVE_TARIFF, ELECTRICITY_USED_TARIFF_ALL, \
     ELECTRICITY_DELIVERED_TARIFF_ALL, HOURLY_GAS_METER_READING
@@ -14,34 +14,28 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        meter_gas = PowerMeter.objects.get_or_create(
+        meter_gas = Meter.objects.get_or_create(
             name='gas',
-            unit=PowerMeter.UNIT_M3
+            unit=Meter.UNIT_M3
         )[0]
 
         serial_reader = DSMR4SerialReader(options['device'])
 
         for telegram in serial_reader.read():
-
             message_datetime = telegram[P1_MESSAGE_TIMESTAMP]
 
             tariff = telegram[ELECTRICITY_ACTIVE_TARIFF]
             tariff = int(tariff.value)
 
-            electricity_used_meter = PowerMeter.objects.get_or_create(
-                name='t{}_used'.format(tariff),
-                unit=PowerMeter.UNIT_KWH
+            electricity_used_meter = Meter.objects.get_or_create(
+                name='electricity_used_t{}'.format(tariff),
+                unit=Meter.UNIT_KWH
             )[0]
 
             electricity_used_total \
                 = telegram[ELECTRICITY_USED_TARIFF_ALL[tariff - 1]]
-            # electricity_used_actual \
-            #     = telegram[CURRENT_ELECTRICITY_USAGE]
-
             electricity_delivered_total = \
                 telegram[ELECTRICITY_DELIVERED_TARIFF_ALL[tariff - 1]]
-            # electricity_delivered_actual = \
-            #     telegram[CURRENT_ELECTRICITY_DELIVERY]
 
             gas_reading = telegram[HOURLY_GAS_METER_READING]
 
@@ -51,9 +45,9 @@ class Command(BaseCommand):
             )
 
             if electricity_delivered_total.value:
-                electricity_delivered_meter = PowerMeter.objects.get_or_create(
-                    name='t{}_delivered'.format(tariff),
-                    unit=PowerMeter.UNIT_KWH
+                electricity_delivered_meter = Meter.objects.get_or_create(
+                    name='electricity_delivered_t{}'.format(tariff),
+                    unit=Meter.UNIT_KWH
                 )[0]
 
                 electricity_delivered_meter.readings.create(

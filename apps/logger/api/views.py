@@ -5,7 +5,7 @@ from rest_framework import generics
 from rest_framework.generics import get_object_or_404
 
 from apps.logger.api.serializers import ReadingReportSerializer
-from apps.logger.models import PowerMeter, Reading
+from apps.logger.models import Meter, Reading
 
 
 class ReadingReportFilter(filters.FilterSet):
@@ -29,6 +29,6 @@ class ReadingReportView(generics.ListAPIView):
     filter_class = ReadingReportFilter
 
     def get_queryset(self):
-        meter = get_object_or_404(PowerMeter, pk=self.kwargs['meter_id'])
+        meter = get_object_or_404(Meter, code=self.kwargs['meter_code'])
 
         return meter.readings.datetime_aggregate(self.kwargs['aggregate'])

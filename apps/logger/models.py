@@ -3,7 +3,7 @@ from django.db.models.aggregates import Sum
 from django.utils.translation import ugettext as _
 
 
-class PowerMeter(models.Model):
+class Meter(models.Model):
     UNIT_KWH = 'kwh'
     UNIT_M3 = 'm3'
 
@@ -12,7 +12,8 @@ class PowerMeter(models.Model):
         (UNIT_M3, _('Cubic meter'))
     )
 
-    name = models.CharField(max_length=255)
+    code = models.CharField(max_length=50, unique=True)
+    display_name = models.CharField(max_length=255, null=True, blank=True)
     unit = models.CharField(choices=UNITS, max_length=10)
 
 
@@ -49,7 +50,7 @@ class Reading(models.Model):
     objects = ReadingReportsQuerySet.as_manager()
 
     power_meter = models.ForeignKey(
-        'logger.PowerMeter',
+        'logger.Meter',
         related_name='readings',
         db_index=True
     )
