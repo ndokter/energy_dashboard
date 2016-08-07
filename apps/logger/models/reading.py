@@ -31,27 +31,31 @@ class ReadingReportsQuerySet(models.QuerySet):
         return connections.databases[self.db]['ENGINE']
 
 
-class Reading(models.Model):
+class ElectricityReadingReportsQuerySet(ReadingReportsQuerySet):
+
+    def datetime_aggregate(self, aggregate):
+
+        return self\
+            .extra(select={'datetime__aggregate': self.AGGREGATES[aggregate]})\
+            .values('datetime__aggregate', 'tariff')\
+            .annotate(Sum('value_increment'))
+
+
+class AbstractReading(models.Model):
     objects = ReadingReportsQuerySet.as_manager()
 
-    power_meter = models.ForeignKey(
-        'logger.Meter',
-        related_name='readings',
-        db_index=True
-    )
     datetime = models.DateTimeField(db_index=True)
     value_increment = models.FloatField()
-    value_total = models.FloatField(db_index=True)
+    value_total = models.FloatField()
 
     class Meta:
-        db_table = 'reading'
+        abstract = True
 
     def save(self, **kwargs):
-
         # Calculate the increment from the previous record.
-        last_record = Reading.objects\
-            .filter(power_meter=self.power_meter)\
-            .order_by('datetime')\
+        last_record = self.__class__.objects \
+            .filter(power_meter=self.power_meter) \
+            .order_by('datetime') \
             .last()
 
         if last_record:
@@ -60,4 +64,20 @@ class Reading(models.Model):
         else:
             self.value_increment = 0
 
-        super(Reading, self).save(**kwargs)
+        return super(self.__class__, self).save(**kwargs)
+
+
+class GasUsedReading(AbstractReading):
+    pass
+
+
+class ElectricityUsedReading(AbstractReading):
+    objects = ElectricityReadingReportsQuerySet.as_manager()
+
+    tariff = models.PositiveSmallIntegerField()
+
+
+class ElectricityDeliveredReading(AbstractReading):
+    objects = ElectricityReadingReportsQuerySet.as_manager()
+
+    tariff = models.PositiveSmallIntegerField()

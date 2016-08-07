@@ -1,6 +1,7 @@
 from django.core.management import BaseCommand
 
-from apps.logger.models import Meter
+from apps.logger.models import GasUsedReading, ElectricityUsedReading, \
+    ElectricityDeliveredReading
 from dsmr_reader.obis_references import P1_MESSAGE_TIMESTAMP, \
     ELECTRICITY_ACTIVE_TARIFF, ELECTRICITY_USED_TARIFF_ALL, \
     ELECTRICITY_DELIVERED_TARIFF_ALL, HOURLY_GAS_METER_READING
@@ -19,7 +20,7 @@ class Command(BaseCommand):
             message_datetime = telegram[P1_MESSAGE_TIMESTAMP]
 
             tariff = telegram[ELECTRICITY_ACTIVE_TARIFF]
-            tariff = int(tariff)
+            tariff = int(tariff.value)
 
             electricity_used_total \
                 = telegram[ELECTRICITY_USED_TARIFF_ALL[tariff - 1]]
@@ -28,26 +29,25 @@ class Command(BaseCommand):
 
             gas_reading = telegram[HOURLY_GAS_METER_READING]
 
-            Meter.register_electricity_used(
-                value_total=electricity_used_total.value,
-                datetime=message_datetime.value,
-                tariff=tariff
+            is_new_gas_reading = not GasUsedReading.objects\
+                .filter(datetime__gte=gas_reading.datetime)\
+                .exists()
+
+            ElectricityUsedReading.objects.create(
+                tariff=tariff,
+                total=electricity_used_total.value,
+                datetime=message_datetime.value
             )
 
             if electricity_delivered_total.value:
-                Meter.register_electricity_delivered(
-                    value_total=electricity_delivered_total.value,
-                    datetime=message_datetime.value,
-                    tariff=tariff
+                ElectricityDeliveredReading.objects.create(
+                    tariff=tariff,
+                    total=electricity_delivered_total.value,
+                    datetime=message_datetime.value
                 )
-
-            is_new_gas_reading = not Meter.get_gas_meter().readings\
-                .filter(datetime__gte=gas_reading.datetime) \
-                .exists()
 
             if is_new_gas_reading:
-                Meter.register_gas_used(
-                    value_total=gas_reading.value,
-                    datetime=gas_reading.datetime
-                )
+                GasUsedReading.objects.create(
+                    total=gas_reading.value,
+                    datetime=gas_reading.datetime)
 
