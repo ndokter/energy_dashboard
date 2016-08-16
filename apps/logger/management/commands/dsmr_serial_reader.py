@@ -1,6 +1,7 @@
+from decimal import Decimal
 from django.core.management import BaseCommand
 
-from apps.logger.models import GasUsedReading, ElectricityUsedReading, \
+from apps.logger.models import GasReading, ElectricityUsedReading, \
     ElectricityDeliveredReading
 from dsmr_reader.obis_references import P1_MESSAGE_TIMESTAMP, \
     ELECTRICITY_ACTIVE_TARIFF, ELECTRICITY_USED_TARIFF_ALL, \
@@ -29,25 +30,26 @@ class Command(BaseCommand):
 
             gas_reading = telegram[HOURLY_GAS_METER_READING]
 
-            is_new_gas_reading = not GasUsedReading.objects\
+            is_new_gas_reading = not GasReading.objects\
                 .filter(datetime__gte=gas_reading.datetime)\
                 .exists()
 
             ElectricityUsedReading.objects.create(
                 tariff=tariff,
-                total=electricity_used_total.value,
+                value_total=Decimal(electricity_used_total.value),
                 datetime=message_datetime.value
             )
 
             if electricity_delivered_total.value:
                 ElectricityDeliveredReading.objects.create(
                     tariff=tariff,
-                    total=electricity_delivered_total.value,
+                    value_total=Decimal(electricity_delivered_total.value),
                     datetime=message_datetime.value
                 )
 
             if is_new_gas_reading:
-                GasUsedReading.objects.create(
-                    total=gas_reading.value,
-                    datetime=gas_reading.datetime)
+                GasReading.objects.create(
+                    value_total=Decimal(gas_reading.value),
+                    datetime=gas_reading.datetime
+                )
 

@@ -46,14 +46,14 @@
             Chart.defaults.global.animation.duration = 0;
 
             function renderElectricityRecentChart() {
-                $.get( '/api/electricity/used/', function( data ) {
+                $.get( '/api/readings/electricity/used/hour/', function( data ) {
                     var dataLabels = [],
                         dataPoints = [],
                         data;
 
                     for (var i=0; i < data.length; i++) {
-                        dataLabels.push(moment.utc(data[i][0]).local().format('HH:ss'));
-                        dataPoints.push(data[i][1]*1000);
+                        dataLabels.push(moment.utc(data[i].datetime).local().format('HH:ss'));
+                        dataPoints.push(data[i].value * 1000);
                     }
 
                     data = {
@@ -68,7 +68,7 @@
 
                     if (electricityRecentChart === null) {
                         electricityRecentChart = new Chart(electricityRecentContext, {
-                            type: 'bar',
+                            type: 'line',
                             data: data,
                             defaults: {
                                 global: {
@@ -86,16 +86,15 @@
             }
 
             function renderGasRecentChart() {
-                $.get( '/api/gas/used/', function( data ) {
+                $.get( '/api/readings/gas/used/hour/', function( data ) {
                     var dataLabels = [],
                         dataPoints = [],
                         data;
 
                     for (var i=0; i < data.length; i++) {
-                        dataLabels.push(moment.utc(data[i][0]).local().format('HH:ss'));
-                        dataPoints.push(data[i][1]);
-                    }
-
+                        dataLabels.push(moment.utc(data[i].datetime).local().format('HH:ss'));
+                        dataPoints.push(data[i].value);
+                   }
                     data = {
                         labels: dataLabels,
                         datasets: [
@@ -108,7 +107,7 @@
 
                     if (gasRecentChart === null) {
                         gasRecentChart = new Chart(gasRecentContext, {
-                            type: 'bar',
+                            type: 'line',
                             data: data,
                             defaults: {
                                 global: {

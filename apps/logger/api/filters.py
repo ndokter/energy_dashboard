@@ -2,7 +2,7 @@ import django_filters
 
 from rest_framework import filters
 
-from apps.logger.models.reading import AbstractReading
+from apps.logger.models import AbstractReading
 
 
 class ReadingFilter(filters.FilterSet):
