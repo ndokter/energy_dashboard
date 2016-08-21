@@ -1,6 +1,8 @@
 from django.db import models
 from django.db.models import Sum
 
+from apps.logger.models.meter import Meter
+
 
 class ReadingReportsQuerySet(models.QuerySet):
     SECOND = 'second'
@@ -23,34 +25,40 @@ class ReadingReportsQuerySet(models.QuerySet):
         return self\
             .extra(select={'datetime__aggregate': self.AGGREGATES[aggregate]}) \
             .values('datetime__aggregate') \
-            .annotate(Sum('value_increment')) \
+            .annotate(Sum('value_increment'), Sum('costs')) \
             .order_by('datetime__aggregate')
 
 
-class AbstractReading(models.Model):
+class Reading(models.Model):
     objects = ReadingReportsQuerySet.as_manager()
 
-    datetime = models.DateTimeField(db_index=True)
+    meter = models.ForeignKey(Meter, related_name='readings')
+
+    datetime = models.DateTimeField()
     value_increment = models.DecimalField(max_digits=8, decimal_places=3)
     value_total = models.DecimalField(max_digits=9, decimal_places=3)
-    costs = models.DecimalField(max_digits=9, decimal_places=3, null=True)
+    costs = models.DecimalField(max_digits=9, decimal_places=4, null=True)
 
-    class Meta:
-        abstract = True
+    class Meta(object):
         ordering = ['datetime']
-
-    def get_previous_record(self):
-        return self.__class__.objects \
-            .filter(datetime__lt=self.datetime) \
-            .last()
+        index_together = ['meter', 'datetime']
 
     def save(self, **kwargs):
-        last_record = self.get_previous_record()
+        last_record = Reading.objects \
+            .filter(datetime__lt=self.datetime, meter=self.meter) \
+            .last()
 
+        # Calculate increment.
         if last_record:
-            self.value_increment = \
-                self.value_total - last_record.value_total
+            self.value_increment = self.value_total - last_record.value_total
         else:
             self.value_increment = 0
 
-        return super(AbstractReading, self).save(**kwargs)
+        # Calculate costs based on the price that is active when the record
+        # counts (based on it's datetime).
+        price = self.meter.prices.active(self.datetime)
+
+        if price:
+            self.costs = self.value_increment * price.amount
+
+        return super(Reading, self).save(**kwargs)

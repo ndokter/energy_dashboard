@@ -46,15 +46,15 @@
             Chart.defaults.global.animation.duration = 0;
 
             function renderElectricityRecentChart() {
-                $.get( '/api/readings/electricity/used/hour/', function( data ) {
+                $.get('/api/readings/electricity/used/hour/', function(data) {
                     var dataLabels = [],
                         dataPoints = [],
                         data;
 
                     for (var i=0; i < data.length; i++) {
                         dataLabels.push(moment.utc(data[i].datetime).local().format('HH:ss'));
-                        dataPoints.push(data[i].value * 1000);
-                    }
+                        dataPoints.push(data[i].costs);
+                   }
 
                     data = {
                         labels: dataLabels,
@@ -86,15 +86,16 @@
             }
 
             function renderGasRecentChart() {
-                $.get( '/api/readings/gas/used/hour/', function( data ) {
+                $.get('/api/readings/gas/used/hour/', function(data) {
                     var dataLabels = [],
                         dataPoints = [],
                         data;
 
                     for (var i=0; i < data.length; i++) {
                         dataLabels.push(moment.utc(data[i].datetime).local().format('HH:ss'));
-                        dataPoints.push(data[i].value);
+                        dataPoints.push(data[i].costs);
                    }
+
                     data = {
                         labels: dataLabels,
                         datasets: [

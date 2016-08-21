@@ -2,7 +2,7 @@ import django_filters
 
 from rest_framework import filters
 
-from apps.logger.models import AbstractReading
+from apps.logger.models.reading import Reading
 
 
 class ReadingFilter(filters.FilterSet):
@@ -16,9 +16,5 @@ class ReadingFilter(filters.FilterSet):
     )
 
     class Meta:
-        model = AbstractReading
+        model = Reading
         fields = ['datetime']
-
-
-class ElectricityReadingFilter(ReadingFilter):
-    tariff = django_filters.NumberFilter()

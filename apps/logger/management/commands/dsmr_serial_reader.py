@@ -1,12 +1,12 @@
 from decimal import Decimal
 from django.core.management import BaseCommand
 
-from apps.logger.models import GasReading, ElectricityUsedReading, \
-    ElectricityDeliveredReading
 from dsmr_reader.obis_references import P1_MESSAGE_TIMESTAMP, \
     ELECTRICITY_ACTIVE_TARIFF, ELECTRICITY_USED_TARIFF_ALL, \
     ELECTRICITY_DELIVERED_TARIFF_ALL, HOURLY_GAS_METER_READING
 from dsmr_reader.readers.v4 import SerialReader as DSMR4SerialReader
+
+from apps.logger.models.meter import MeterGroup
 
 
 class Command(BaseCommand):
@@ -30,26 +30,23 @@ class Command(BaseCommand):
 
             gas_reading = telegram[HOURLY_GAS_METER_READING]
 
-            is_new_gas_reading = not GasReading.objects\
+            is_new_gas_reading = not MeterGroup.meter.gas().readings\
                 .filter(datetime__gte=gas_reading.datetime)\
                 .exists()
 
-            ElectricityUsedReading.objects.create(
-                tariff=tariff,
-                value_total=Decimal(electricity_used_total.value),
-                datetime=message_datetime.value
+            MeterGroup.meter.electricity_used(tariff).readings.create(
+                datetime=message_datetime.value,
+                value_total=Decimal(electricity_used_total.value)
             )
 
             if electricity_delivered_total.value:
-                ElectricityDeliveredReading.objects.create(
-                    tariff=tariff,
-                    value_total=Decimal(electricity_delivered_total.value),
-                    datetime=message_datetime.value
+                MeterGroup.meter.electricity_delivered(tariff).readings.create(
+                    datetime=message_datetime.value,
+                    value_total=Decimal(electricity_delivered_total.value)
                 )
 
             if is_new_gas_reading:
-                GasReading.objects.create(
+                MeterGroup.meter.gas().readings.create(
                     value_total=Decimal(gas_reading.value),
                     datetime=gas_reading.datetime
                 )
-
