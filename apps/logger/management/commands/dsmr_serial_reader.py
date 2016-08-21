@@ -1,4 +1,3 @@
-from decimal import Decimal
 from django.core.management import BaseCommand
 
 from dsmr_reader.obis_references import P1_MESSAGE_TIMESTAMP, \
@@ -36,17 +35,17 @@ class Command(BaseCommand):
 
             MeterGroup.meter.electricity_used(tariff).readings.create(
                 datetime=message_datetime.value,
-                value_total=Decimal(electricity_used_total.value)
+                value_total=electricity_used_total.value
             )
 
             if electricity_delivered_total.value:
                 MeterGroup.meter.electricity_delivered(tariff).readings.create(
                     datetime=message_datetime.value,
-                    value_total=Decimal(electricity_delivered_total.value)
+                    value_total=electricity_delivered_total.value
                 )
 
             if is_new_gas_reading:
                 MeterGroup.meter.gas().readings.create(
-                    value_total=Decimal(gas_reading.value),
+                    value_total=gas_reading.value,
                     datetime=gas_reading.datetime
                 )
