@@ -1,9 +1,10 @@
 from django.core.management import BaseCommand
 
-from dsmr_reader.obis_references import P1_MESSAGE_TIMESTAMP, \
+from dsmr_parser.obis_references import P1_MESSAGE_TIMESTAMP, \
     ELECTRICITY_ACTIVE_TARIFF, ELECTRICITY_USED_TARIFF_ALL, \
     ELECTRICITY_DELIVERED_TARIFF_ALL, HOURLY_GAS_METER_READING
-from dsmr_reader.readers.v4 import SerialReader as DSMR4SerialReader
+from dsmr_parser import telegram_specifications
+from dsmr_parser.serial import SerialReader, SERIAL_SETTINGS_V4
 
 from apps.logger.models.meter import MeterGroup
 
@@ -14,7 +15,11 @@ class Command(BaseCommand):
         parser.add_argument('device', type=str)
 
     def handle(self, *args, **options):
-        serial_reader = DSMR4SerialReader(options['device'])
+        serial_reader = SerialReader(
+            device=options['device'],
+            serial_settings=SERIAL_SETTINGS_V4,
+            telegram_specification=telegram_specifications.V4
+        )
 
         for telegram in serial_reader.read():
             message_datetime = telegram[P1_MESSAGE_TIMESTAMP]
