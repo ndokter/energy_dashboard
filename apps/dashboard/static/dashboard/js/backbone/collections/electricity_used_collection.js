@@ -5,6 +5,6 @@ var app = app || {};
 	'use strict';
 
     app.ElectricityUsedCollection = Backbone.Collection.extend({
-        url: 'http://localhost:8000/api/readings/electricity/used/hour/'
+        url: '/api/readings/electricity/used/hour/'
     });
 })(jQuery);
