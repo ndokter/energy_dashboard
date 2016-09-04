@@ -120,7 +120,6 @@ var app = app || {};
         },
 
 		renderGraphs: function() {
-
 		    let panelBody = $(".panel-body", this.$el);
 
             // TODO fix this and move to initialize again.

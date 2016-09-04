@@ -33,7 +33,7 @@ var app = app || {};
                         data;
 
                     electricityUsedCollection.each(function (item, index, all) {
-                        dataLabels.push(moment(item.attributes.datetime).local().format(dateFormat));
+                        dataLabels.push(moment.utc(item.attributes.datetime).local().format(dateFormat));
 
                         if (dataType == 'costs') {
                             dataPoints.push(item.attributes.costs);
