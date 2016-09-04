@@ -13,7 +13,7 @@ var app = app || {};
             this.dataType = 'costs'
 
             this.start = moment().startOf('day');
-            this.end = moment().endOf('day');
+            this.end = moment(this.start).endOf('day');
 
             this.render();
         },
@@ -35,16 +35,16 @@ var app = app || {};
             target.addClass('active');
 
             if (this.period == 'hours') {
-                this.start = moment().startOf('day');
-                this.end = moment().endOf('day');
+                this.start = moment().local().startOf('day');
+                this.end = moment(this.start).endOf('day');
                 this.aggregation = 'hour';
             } else if (this.period == 'days') {
-                this.start = moment().startOf('month');
-                this.end = moment().endOf('month');
+                this.start = moment().local().startOf('month');
+                this.end = moment(this.start).endOf('month');
                 this.aggregation = 'day';
             } else if (this.period == 'months') {
-                this.start = moment().startOf('year');
-                this.end = moment().endOf('year');
+                this.start = moment().local().startOf('year');
+                this.end = moment(this.start).endOf('year');
                 this.aggregation = 'month';
             }
 
@@ -54,14 +54,14 @@ var app = app || {};
 
         nextDate: function() {
             if (this.period == 'hours') {
-                this.start.add(1, 'day');
-                this.end.add(1, 'day');
+                this.start.local().add(1, 'day');
+                this.end = this.start.clone().endOf('day');
             } else if (this.period == 'days') {
-                this.start.add(1, 'month');
-                this.end.add(1, 'month');
+                this.start.local().add(1, 'month');
+                this.end = this.start.clone().endOf('month');
             } else if (this.period == 'months') {
-                this.start.add(1, 'year');
-                this.end.add(1, 'year');
+                this.start.local().add(1, 'year');
+                this.end = this.start.clone().endOf('year');
             }
 
             this.renderCurrentDate();
@@ -70,14 +70,14 @@ var app = app || {};
 
         previousDate: function() {
             if (this.period == 'hours') {
-                this.start.subtract(1, 'day');
-                this.end.subtract(1, 'day');
+                this.start.local().subtract(1, 'day');
+                this.end = moment(this.start).endOf('day');
             } else if (this.period == 'days') {
-                this.start.subtract(1, 'month');
-                this.end.subtract(1, 'month');
+                this.start.local().subtract(1, 'month');
+                this.end = moment(this.start).endOf('month');
             } else if (this.period == 'months') {
-                this.start.subtract(1, 'year');
-                this.end.subtract(1, 'year');
+                this.start.local().subtract(1, 'year');
+                this.end = moment(this.start).endOf('year');
             }
 
             this.renderCurrentDate();
