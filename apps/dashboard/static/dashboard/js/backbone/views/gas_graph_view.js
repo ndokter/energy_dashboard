@@ -21,7 +21,7 @@ var app = app || {};
             if (aggregation == 'hour') {
                 dateFormat = 'HH:ss';
             } else if (aggregation == 'day') {
-                dateFormat = 'D MMM';
+                dateFormat = 'ddd D MMM';
             } else if (aggregation == 'month') {
                 dateFormat = 'MMMM YYYY';
             }
