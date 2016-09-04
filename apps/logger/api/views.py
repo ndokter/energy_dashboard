@@ -17,13 +17,8 @@ class ReadingElectricityUsedView(generics.ListAPIView):
             slug=MeterGroup.SLUG_ELECTRICITY_USED
         )
 
-        # TODO tmp (move the range responsibility to the front-end)
-        end = timezone.now()
-        start = end - datetime.timedelta(days=1)
-
         return meter_group\
             .readings()\
-            .filter(datetime__range=[start, end])\
             .datetime_aggregate(self.kwargs['aggregate'])
 
 
@@ -36,13 +31,8 @@ class ReadingElectricityDeliveredView(generics.ListAPIView):
             slug=MeterGroup.SLUG_ELECTRICITY_DELIVERED
         )
 
-        # TODO tmp (move the range responsibility to the front-end)
-        end = timezone.now()
-        start = end - datetime.timedelta(days=1)
-
         return meter_group\
             .readings()\
-            .filter(datetime__range=[start, end])\
             .datetime_aggregate(self.kwargs['aggregate'])
 
 
@@ -55,11 +45,6 @@ class ReadingGasUsedView(generics.ListAPIView):
             slug=MeterGroup.SLUG_GAS
         )
 
-        # TODO tmp (move the range responsibility to the front-end)
-        end = timezone.now()
-        start = end - datetime.timedelta(days=1)
-
         return meter_group\
             .readings()\
-            .filter(datetime__gte=start, datetime__lt=end)\
             .datetime_aggregate(self.kwargs['aggregate'])

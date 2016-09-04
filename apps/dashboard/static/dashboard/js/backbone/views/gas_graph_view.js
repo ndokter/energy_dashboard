@@ -5,19 +5,17 @@ var app = app || {};
 	'use strict';
 
     app.GasGraphView = Backbone.View.extend({
-        template: _.template($('#energy-graph-template').html()),
+        tagName: 'canvas',
 
-        render: function() {
-            this.$el.html(this.template({'title': 'Gasverbruik'}));
-
-            this.renderChart();
+        render: function(start, end, aggregation, dataType) {
+            this.renderChart(start, end, aggregation, dataType);
 
             return this;
         },
 
-        renderChart: function() {
-            let gasUsedCollection = new app.GasUsedCollection(),
-                canvas = $('canvas', this.el);
+        renderChart: function(start, end, aggregation, dataType) {
+            let gasUsedCollection = new app.GasUsedCollection(start, end, aggregation),
+                canvas = $(this.el);
 
             gasUsedCollection.fetch({
                 success: function (gasUsedCollection, response) {
@@ -27,7 +25,12 @@ var app = app || {};
 
                     gasUsedCollection.each(function (item, index, all) {
                         dataLabels.push(moment.utc(item.attributes.datetime).local().format('HH:ss'));
-                        dataPoints.push(item.attributes.costs);
+
+                        if (dataType == 'costs') {
+                            dataPoints.push(item.attributes.costs);
+                        } else if (dataType == 'usage') {
+                            dataPoints.push(item.attributes.value);
+                        }
                     });
 
                     data = {

@@ -1,3 +1,17 @@
-.widget {
+button {
+    outline: none !important;
+}
+
+.energy-graph-wrapper {
     margin: 10px;
+}
+.energy-graph-wrapper .panel-heading .current-date {
+    margin-left: 10px;
+}
+.energy-graph-wrapper .panel-heading .data-type {
+    float: right;
+}
+.energy-graph-wrapper .panel-body canvas {
+    height: 200px !important;
+
 }

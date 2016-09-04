@@ -5,19 +5,26 @@ var app = app || {};
 	'use strict';
 
     app.ElectricityGraphView = Backbone.View.extend({
-        template: _.template($('#energy-graph-template').html()),
+        tagName: 'canvas',
 
-        render: function() {
-            this.$el.html(this.template({'title': 'Electriciteitsverbruik'}));
-
-            this.renderChart();
+        render: function(start, end, aggregation, dataType) {
+            this.renderChart(start, end, aggregation, dataType);
 
             return this;
         },
 
-        renderChart: function() {
-            let electricityUsedCollection = new app.ElectricityUsedCollection(),
-                canvas = $('canvas', this.el);
+        renderChart: function(start, end, aggregation, dataType) {
+            let electricityUsedCollection = new app.ElectricityUsedCollection(start, end, aggregation),
+                canvas = $(this.el),
+                dateFormat;
+
+            if (aggregation == 'hour') {
+                dateFormat = 'HH:ss';
+            } else if (aggregation == 'day') {
+                dateFormat = 'D MMM';
+            } else if (aggregation == 'month') {
+                dateFormat = 'MMMM YYYY';
+            }
 
             electricityUsedCollection.fetch({
                 success: function (electricityUsedCollection, response) {
@@ -26,8 +33,13 @@ var app = app || {};
                         data;
 
                     electricityUsedCollection.each(function (item, index, all) {
-                        dataLabels.push(moment.utc(item.attributes.datetime).local().format('HH:ss'));
-                        dataPoints.push(item.attributes.costs);
+                        dataLabels.push(moment(item.attributes.datetime).local().format(dateFormat));
+
+                        if (dataType == 'costs') {
+                            dataPoints.push(item.attributes.costs);
+                        } else if (dataType == 'usage') {
+                            dataPoints.push(item.attributes.value);
+                        }
                     });
 
                     data = {
@@ -42,7 +54,8 @@ var app = app || {};
 
                     new Chart(canvas, {
                         type: 'line',
-                        data: data
+                        data: data,
+
                     });
                 }
             });

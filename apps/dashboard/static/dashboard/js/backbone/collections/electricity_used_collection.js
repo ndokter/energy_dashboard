@@ -5,6 +5,17 @@ var app = app || {};
 	'use strict';
 
     app.ElectricityUsedCollection = Backbone.Collection.extend({
-        url: '/api/readings/electricity/used/hour/'
+        initialize: function(start, end, aggregation) {
+            this.start = start;
+            this.end = end;
+            this.aggregation = aggregation;
+        },
+
+        url: function() {
+            let start = this.start.utc().format('YYYY-MM-DD HH:mm:ss'),
+                end = this.end.utc().format('YYYY-MM-DD HH:mm:ss');
+
+            return '/api/readings/electricity/used/' + this.aggregation + '/' + '?datetime_start=' + start + '&datetime_end=' + end;
+        }
     });
 })(jQuery);
