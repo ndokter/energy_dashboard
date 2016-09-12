@@ -23,6 +23,8 @@ var app = app || {};
                 dateFormat,
                 that = this;
 
+            this.$el.addClass('graph-loading');
+
             if (aggregation == 'hour') {
                 dateFormat = 'HH:ss';
             } else if (aggregation == 'day') {
@@ -65,6 +67,8 @@ var app = app || {};
                         type: 'line',
                         data: data
                     });
+
+                    that.$el.removeClass('graph-loading');
                 }
             });
         }

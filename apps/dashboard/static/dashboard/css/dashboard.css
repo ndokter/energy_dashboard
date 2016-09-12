@@ -2,6 +2,10 @@ button {
     outline: none !important;
 }
 
+.graph-loading {
+    opacity: 0.6;
+}
+
 .energy-graph-wrapper {
     margin: 10px;
 }
@@ -13,5 +17,4 @@ button {
 }
 .energy-graph-wrapper .panel-body canvas {
     height: 200px !important;
-
 }
