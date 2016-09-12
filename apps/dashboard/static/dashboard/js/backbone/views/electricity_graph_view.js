@@ -7,6 +7,10 @@ var app = app || {};
     app.ElectricityGraphView = Backbone.View.extend({
         tagName: 'canvas',
 
+        initialize: function() {
+            this.chart = null;
+        },
+
         render: function(start, end, aggregation, dataType) {
             this.renderChart(start, end, aggregation, dataType);
 
@@ -16,7 +20,8 @@ var app = app || {};
         renderChart: function(start, end, aggregation, dataType) {
             let electricityUsedCollection = new app.ElectricityUsedCollection(start, end, aggregation),
                 canvas = $(this.el),
-                dateFormat;
+                dateFormat,
+                that = this;
 
             if (aggregation == 'hour') {
                 dateFormat = 'HH:ss';
@@ -52,10 +57,13 @@ var app = app || {};
                         ]
                     };
 
-                    new Chart(canvas, {
+                    if (that.chart !== null) {
+                        that.chart.destroy();
+                    }
+
+                    that.chart = new Chart(canvas, {
                         type: 'line',
                         data: data,
-
                     });
                 }
             });

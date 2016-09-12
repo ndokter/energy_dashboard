@@ -15,6 +15,9 @@ var app = app || {};
             this.start = moment().startOf('day');
             this.end = moment(this.start).endOf('day');
 
+            this.electricityUsedView = new app.ElectricityGraphView();
+            this.gasUsedView = new app.GasGraphView();
+
             this.render();
         },
 
@@ -122,9 +125,6 @@ var app = app || {};
 		renderGraphs: function() {
 		    let panelBody = $(".panel-body", this.$el);
 
-            // TODO fix this and move to initialize again.
-            let electricityUsedView = new app.ElectricityGraphView(),
-                gasUsedView = new app.GasGraphView();
 
 		    panelBody.empty();
 
@@ -133,7 +133,7 @@ var app = app || {};
 		    // https://github.com/chartjs/Chart.js/issues/56
 		    panelBody.append(
                 $('<div/>').addClass('canvas-wrapper').append(
-                    electricityUsedView.render(
+                    this.electricityUsedView.render(
                         this.start,
                         this.end,
                         this.aggregation,
@@ -144,7 +144,7 @@ var app = app || {};
 
             panelBody.append(
                 $('<div/>').addClass('canvas-wrapper').append(
-                    gasUsedView.render(
+                    this.gasUsedView.render(
                         this.start,
                         this.end,
                         this.aggregation,
