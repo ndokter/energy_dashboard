@@ -54,7 +54,7 @@ class MeterTariff(models.Model):
         (UNIT_M3, UNIT_M3),
     )
 
-    meter = models.ForeignKey(Meter, related_name='meters')
+    meter = models.ForeignKey(Meter, related_name='tariffs')
 
     tariff = models.PositiveSmallIntegerField()
     unit = models.CharField(max_length=10, choices=UNIT_CHOICES)
