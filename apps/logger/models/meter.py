@@ -4,73 +4,79 @@ from django.db import models
 class MeterManager(models.Manager):
 
     def electricity_used(self, tariff):
-        meter_group = self.get_or_create(
-            slug=MeterGroup.SLUG_ELECTRICITY_USED
-        )[0]
+        meter, _ = self.get_or_create(slug=MeterTmp.SLUG_ELECTRICITY_USED)
 
-        return meter_group.meters.get_or_create(
-            slug='t{}'.format(tariff)
-        )[0]
+        return meter.tariffs.get_or_create(tariff=tariff)
 
     def electricity_delivered(self, tariff):
-        meter_group = self.get_or_create(
-            slug=MeterGroup.SLUG_ELECTRICITY_DELIVERED
-        )[0]
+        meter, _ = self.get_or_create(slug=MeterTmp.SLUG_ELECTRICITY_DELIVERED)
 
-        return meter_group.meters.get_or_create(
-            slug='t{}'.format(tariff)
-        )[0]
+        return meter.tariffs.get_or_create(tariff=tariff)
 
     def gas(self):
-        meter_group = self.get_or_create(slug=MeterGroup.SLUG_GAS)[0]
+        meter, _ = self.get_or_create(slug=MeterTmp.SLUG_GAS)
 
-        return meter_group.meters.get_or_create(slug='gas')[0]
+        # Gas doesn't has only one tariff and therefor uses a fixed one.
+        return meter.tariffs.get_or_create(tariff=1)
 
 
-class MeterGroup(models.Model):
+class MeterTmp(models.Model):
     objects = models.Manager()
-    meter = MeterManager()
+    manager = MeterManager()
 
     SLUG_ELECTRICITY_USED = 'electricity-used'
     SLUG_ELECTRICITY_DELIVERED = 'electricity-delivered'
     SLUG_GAS = 'gas'
 
-    slug = models.CharField(max_length=50, unique=True)
+    SLUG_CHOICES = (
+        (SLUG_ELECTRICITY_USED, SLUG_ELECTRICITY_USED),
+        (SLUG_ELECTRICITY_DELIVERED, SLUG_ELECTRICITY_DELIVERED),
+        (SLUG_GAS, SLUG_GAS),
+    )
+
+    slug = models.CharField(max_length=50, choices=SLUG_CHOICES, unique=True)
 
     def readings(self):
         """
-        A queryset for all meter readings that belong to this meter group.
+        A queryset for all readings of all tariffs.
         """
         from apps.logger.models.reading import Reading
 
-        return Reading.objects.filter(meter__in=self.meters.all())
+        return Reading.objects.filter(meter_tariff__meter__pk=self.pk)
 
 
-class Meter(models.Model):
+class MeterTariff(models.Model):
     UNIT_KWH = 'kWh'
     UNIT_M3 = 'm3'
 
-    meter_group = models.ForeignKey(MeterGroup, related_name='meters')
+    UNIT_CHOICES = (
+        (UNIT_KWH, UNIT_KWH),
+        (UNIT_M3, UNIT_M3),
+    )
 
+    meter = models.ForeignKey(MeterTmp, related_name='tariffs')
+
+    tariff = models.PositiveSmallIntegerField(null=True)
     slug = models.CharField(max_length=50)
-    unit = models.CharField(max_length=10)
+    unit = models.CharField(max_length=10, choices=UNIT_CHOICES)
 
 
 class MeterPriceQuerySet(models.QuerySet):
+
     def active(self, datetime):
         """
         Get active price for the given datetime.
         """
         try:
             return self.filter(start__lte=datetime, end__gt=datetime).get()
-        except MeterPrice.DoesNotExist:
+        except MeterTariffPrice.DoesNotExist:
             return
 
 
-class MeterPrice(models.Model):
+class MeterTariffPrice(models.Model):
     objects = MeterPriceQuerySet.as_manager()
 
-    meter = models.ForeignKey(Meter, related_name='prices')
+    meter = models.ForeignKey(MeterTariff, related_name='prices')
 
     start = models.DateField()
     end = models.DateField()
