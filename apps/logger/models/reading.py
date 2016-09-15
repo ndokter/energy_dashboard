@@ -45,7 +45,10 @@ class Reading(models.Model):
 
     def save(self, **kwargs):
         last_record = Reading.objects \
-            .filter(datetime__lt=self.datetime, meter=self.meter) \
+            .filter(
+                datetime__lt=self.datetime,
+                meter_tariff=self.meter_tariff
+            ) \
             .last()
 
         # Calculate increment.
