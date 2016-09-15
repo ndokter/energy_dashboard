@@ -6,18 +6,18 @@ class MeterManager(models.Manager):
     def electricity_used(self, tariff):
         meter, _ = self.get_or_create(slug=Meter.SLUG_ELECTRICITY_USED)
 
-        return meter.tariffs.get_or_create(tariff=tariff)
+        return meter.tariffs.get_or_create(tariff=tariff)[0]
 
     def electricity_delivered(self, tariff):
         meter, _ = self.get_or_create(slug=Meter.SLUG_ELECTRICITY_DELIVERED)
 
-        return meter.tariffs.get_or_create(tariff=tariff)
+        return meter.tariffs.get_or_create(tariff=tariff)[0]
 
     def gas(self):
         meter, _ = self.get_or_create(slug=Meter.SLUG_GAS)
 
         # Gas doesn't has only one tariff and therefor uses a fixed one.
-        return meter.tariffs.get_or_create(tariff=1)
+        return meter.tariffs.get_or_create(tariff=1)[0]
 
 
 class Meter(models.Model):
