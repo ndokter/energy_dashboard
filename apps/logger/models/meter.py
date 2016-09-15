@@ -4,23 +4,23 @@ from django.db import models
 class MeterManager(models.Manager):
 
     def electricity_used(self, tariff):
-        meter, _ = self.get_or_create(slug=MeterTmp.SLUG_ELECTRICITY_USED)
+        meter, _ = self.get_or_create(slug=Meter.SLUG_ELECTRICITY_USED)
 
         return meter.tariffs.get_or_create(tariff=tariff)
 
     def electricity_delivered(self, tariff):
-        meter, _ = self.get_or_create(slug=MeterTmp.SLUG_ELECTRICITY_DELIVERED)
+        meter, _ = self.get_or_create(slug=Meter.SLUG_ELECTRICITY_DELIVERED)
 
         return meter.tariffs.get_or_create(tariff=tariff)
 
     def gas(self):
-        meter, _ = self.get_or_create(slug=MeterTmp.SLUG_GAS)
+        meter, _ = self.get_or_create(slug=Meter.SLUG_GAS)
 
         # Gas doesn't has only one tariff and therefor uses a fixed one.
         return meter.tariffs.get_or_create(tariff=1)
 
 
-class MeterTmp(models.Model):
+class Meter(models.Model):
     objects = models.Manager()
     manager = MeterManager()
 
@@ -38,7 +38,7 @@ class MeterTmp(models.Model):
 
     def readings(self):
         """
-        A queryset for all readings of all tariffs.
+        A queryset for all meter readings that belong to this meter group.
         """
         from apps.logger.models.reading import Reading
 
@@ -54,10 +54,9 @@ class MeterTariff(models.Model):
         (UNIT_M3, UNIT_M3),
     )
 
-    meter = models.ForeignKey(MeterTmp, related_name='tariffs')
+    meter = models.ForeignKey(Meter, related_name='meters')
 
-    tariff = models.PositiveSmallIntegerField(null=True)
-    slug = models.CharField(max_length=50)
+    tariff = models.PositiveSmallIntegerField()
     unit = models.CharField(max_length=10, choices=UNIT_CHOICES)
 
 
@@ -76,7 +75,7 @@ class MeterPriceQuerySet(models.QuerySet):
 class MeterTariffPrice(models.Model):
     objects = MeterPriceQuerySet.as_manager()
 
-    meter = models.ForeignKey(MeterTariff, related_name='prices')
+    meter_tariff = models.ForeignKey(MeterTariff, related_name='prices')
 
     start = models.DateField()
     end = models.DateField()

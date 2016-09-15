@@ -1,11 +1,8 @@
-import datetime
-
-from django.utils import timezone
 from rest_framework import generics
 
 from apps.logger.api.filters import ReadingFilter
 from apps.logger.api.serializers import ReadingSerializer
-from apps.logger.models.meter import MeterGroup
+from apps.logger.models.meter import Meter
 
 
 class ReadingElectricityUsedView(generics.ListAPIView):
@@ -13,11 +10,9 @@ class ReadingElectricityUsedView(generics.ListAPIView):
     filter_class = ReadingFilter
 
     def get_queryset(self):
-        meter_group = MeterGroup.objects.get(
-            slug=MeterGroup.SLUG_ELECTRICITY_USED
-        )
+        meter = Meter.objects.get(slug=Meter.SLUG_ELECTRICITY_USED)
 
-        return meter_group\
+        return meter\
             .readings()\
             .datetime_aggregate(self.kwargs['aggregate'])
 
@@ -27,11 +22,9 @@ class ReadingElectricityDeliveredView(generics.ListAPIView):
     filter_class = ReadingFilter
 
     def get_queryset(self):
-        meter_group = MeterGroup.objects.get(
-            slug=MeterGroup.SLUG_ELECTRICITY_DELIVERED
-        )
+        meter = Meter.objects.get(slug=Meter.SLUG_ELECTRICITY_DELIVERED)
 
-        return meter_group\
+        return meter\
             .readings()\
             .datetime_aggregate(self.kwargs['aggregate'])
 
@@ -41,10 +34,8 @@ class ReadingGasUsedView(generics.ListAPIView):
     filter_class = ReadingFilter
 
     def get_queryset(self):
-        meter_group = MeterGroup.objects.get(
-            slug=MeterGroup.SLUG_GAS
-        )
+        meter = Meter.objects.get(slug=Meter.SLUG_GAS)
 
-        return meter_group\
+        return meter\
             .readings()\
             .datetime_aggregate(self.kwargs['aggregate'])

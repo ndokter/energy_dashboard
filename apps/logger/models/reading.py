@@ -1,7 +1,7 @@
 from django.db import models
 from django.db.models import Sum
 
-from apps.logger.models.meter import Meter
+from apps.logger.models.meter import MeterTariff
 
 
 class ReadingReportsQuerySet(models.QuerySet):
@@ -32,7 +32,7 @@ class ReadingReportsQuerySet(models.QuerySet):
 class Reading(models.Model):
     objects = ReadingReportsQuerySet.as_manager()
 
-    meter = models.ForeignKey(Meter, related_name='readings')
+    meter_tariff = models.ForeignKey(MeterTariff, related_name='readings')
 
     datetime = models.DateTimeField()
     value_increment = models.DecimalField(max_digits=8, decimal_places=3)
@@ -41,7 +41,7 @@ class Reading(models.Model):
 
     class Meta(object):
         ordering = ['datetime']
-        index_together = ['meter', 'datetime']
+        index_together = ['meter_tariff', 'datetime']
 
     def save(self, **kwargs):
         last_record = Reading.objects \

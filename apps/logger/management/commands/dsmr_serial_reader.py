@@ -6,7 +6,7 @@ from dsmr_parser.obis_references import P1_MESSAGE_TIMESTAMP, \
 from dsmr_parser import telegram_specifications
 from dsmr_parser.serial import SerialReader, SERIAL_SETTINGS_V4
 
-from apps.logger.models.meter import MeterGroup
+from apps.logger.models.meter import Meter
 
 
 class Command(BaseCommand):
@@ -34,23 +34,23 @@ class Command(BaseCommand):
 
             gas_reading = telegram[HOURLY_GAS_METER_READING]
 
-            is_new_gas_reading = not MeterGroup.meter.gas().readings\
+            is_new_gas_reading = not Meter.manager.gas().readings\
                 .filter(datetime__gte=gas_reading.datetime)\
                 .exists()
 
-            MeterGroup.meter.electricity_used(tariff).readings.create(
+            Meter.manager.electricity_used(tariff).readings.create(
                 datetime=message_datetime.value,
                 value_total=electricity_used_total.value
             )
 
             if electricity_delivered_total.value:
-                MeterGroup.meter.electricity_delivered(tariff).readings.create(
+                Meter.manager.electricity_delivered(tariff).readings.create(
                     datetime=message_datetime.value,
                     value_total=electricity_delivered_total.value
                 )
 
             if is_new_gas_reading:
-                MeterGroup.meter.gas().readings.create(
+                Meter.manager.gas().readings.create(
                     value_total=gas_reading.value,
                     datetime=gas_reading.datetime
                 )
