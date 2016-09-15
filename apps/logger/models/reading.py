@@ -59,7 +59,7 @@ class Reading(models.Model):
 
         # Calculate costs based on the price that is active when the record
         # counts (based on it's datetime).
-        price = self.meter.prices.active(self.datetime)
+        price = self.meter_tariff.prices.active(self.datetime)
 
         if price:
             self.costs = self.value_increment * price.amount
