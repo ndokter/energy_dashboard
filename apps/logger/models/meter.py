@@ -3,21 +3,27 @@ from django.db import models
 
 class MeterManager(models.Manager):
 
-    def electricity_used(self, tariff):
-        meter, _ = self.get_or_create(slug=Meter.SLUG_ELECTRICITY_USED)
+    def electricity_used(self):
+        return self.get_or_create(slug=Meter.SLUG_ELECTRICITY_USED)[0]
 
-        return meter.tariffs.get_or_create(tariff=tariff)[0]
+    def electricity_delivered(self):
+        return self.get_or_create(slug=Meter.SLUG_ELECTRICITY_DELIVERED)[0]
 
-    def electricity_delivered(self, tariff):
-        meter, _ = self.get_or_create(slug=Meter.SLUG_ELECTRICITY_DELIVERED)
-
-        return meter.tariffs.get_or_create(tariff=tariff)[0]
-
-    def gas(self):
-        meter, _ = self.get_or_create(slug=Meter.SLUG_GAS)
+    def gas_tariff(self):
+        meter = self.get_or_create(slug=Meter.SLUG_GAS)[0]
 
         # Gas doesn't has only one tariff and therefor uses a fixed one.
         return meter.tariffs.get_or_create(tariff=1)[0]
+
+    def electricity_used_tariff(self, tariff):
+        meter = self.electricity_used()
+
+        return meter.tariffs.get_or_create(tariff=tariff)[0]
+
+    def electricity_delivered_tariff(self, tariff):
+        meter = self.electricity_delivered()
+
+        return meter.tariffs.get_or_create(tariff=tariff)[0]
 
 
 class Meter(models.Model):
@@ -43,40 +49,3 @@ class Meter(models.Model):
         from apps.logger.models.reading import Reading
 
         return Reading.objects.filter(meter_tariff__meter__pk=self.pk)
-
-
-class MeterTariff(models.Model):
-    UNIT_KWH = 'kWh'
-    UNIT_M3 = 'm3'
-
-    UNIT_CHOICES = (
-        (UNIT_KWH, UNIT_KWH),
-        (UNIT_M3, UNIT_M3),
-    )
-
-    meter = models.ForeignKey(Meter, related_name='tariffs')
-
-    tariff = models.PositiveSmallIntegerField()
-    unit = models.CharField(max_length=10, choices=UNIT_CHOICES)
-
-
-class MeterPriceQuerySet(models.QuerySet):
-
-    def active(self, datetime):
-        """
-        Get active price for the given datetime.
-        """
-        try:
-            return self.filter(start__lte=datetime, end__gt=datetime).get()
-        except MeterTariffPrice.DoesNotExist:
-            return
-
-
-class MeterTariffPrice(models.Model):
-    objects = MeterPriceQuerySet.as_manager()
-
-    meter_tariff = models.ForeignKey(MeterTariff, related_name='prices')
-
-    start = models.DateField()
-    end = models.DateField()
-    amount = models.DecimalField(max_digits=4, decimal_places=4)

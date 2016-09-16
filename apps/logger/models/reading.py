@@ -1,32 +1,17 @@
 from django.db import models
 from django.db.models import Sum
 
-from apps.logger.models.meter import MeterTariff
+from apps.logger.models.datetime_aggregate_queryset import \
+    DatetimeAggregateQuerySet
+from apps.logger.models.meter_tariff import MeterTariff
 
 
-class ReadingReportsQuerySet(models.QuerySet):
-    SECOND = 'second'
-    MINUTE = 'minute'
-    HOUR = 'hour'
-    DAY = 'day'
-    MONTH = 'month'
-    YEAR = 'year'
-
-    AGGREGATES = {
-        SECOND: "strftime('%%Y-%%m-%%dT%%H:%%M:%%S', datetime)",
-        MINUTE: "strftime('%%Y-%%m-%%dT%%H:%%M:00', datetime)",
-        HOUR: "strftime('%%Y-%%m-%%dT%%H:00:00', datetime)",
-        DAY: "strftime('%%Y-%%m-%%dT00:00:00', datetime)",
-        MONTH: "strftime('%%Y-%%m-01T00:00:00', datetime)",
-        YEAR: "strftime('%%Y-01-01T00:00:00', datetime)",
-    }
+class ReadingReportsQuerySet(DatetimeAggregateQuerySet):
 
     def datetime_aggregate(self, aggregate):
-        return self\
-            .extra(select={'datetime__aggregate': self.AGGREGATES[aggregate]}) \
-            .values('datetime__aggregate') \
-            .annotate(Sum('value_increment'), Sum('costs')) \
-            .order_by('datetime__aggregate')
+        return super(ReadingReportsQuerySet, self)\
+            .datetime_aggregate(aggregate) \
+            .annotate(Sum('value_increment'), Sum('costs'))
 
 
 class Reading(models.Model):
