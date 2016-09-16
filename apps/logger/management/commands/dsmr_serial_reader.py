@@ -46,7 +46,7 @@ class Command(BaseCommand):
 
             Meter.manager.electricity_used().electricity_actual.create(
                 datetime=message_datetime.value,
-                value=electricity_used_actual
+                value=electricity_used_actual.value
             )
             Meter.manager.electricity_used_tariff(tariff).readings.create(
                 datetime=message_datetime.value,
@@ -56,7 +56,7 @@ class Command(BaseCommand):
             if electricity_delivered_total.value:
                 Meter.manager.electricity_used().electricity_delivered.create(
                     datetime=message_datetime.value,
-                    value=electricity_delivered_actual
+                    value=electricity_delivered_actual.value
                 )
                 Meter.manager.electricity_delivered_tariff(tariff).readings.create(
                     datetime=message_datetime.value,
