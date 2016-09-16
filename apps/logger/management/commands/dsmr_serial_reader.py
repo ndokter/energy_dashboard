@@ -7,7 +7,7 @@ from dsmr_parser.obis_references import P1_MESSAGE_TIMESTAMP, \
 from dsmr_parser import telegram_specifications
 from dsmr_parser.serial import SerialReader, SERIAL_SETTINGS_V4
 
-from apps.logger.models.meter import MeterManager
+from apps.logger.models.meter import Meter
 
 
 class Command(BaseCommand):
@@ -40,31 +40,31 @@ class Command(BaseCommand):
 
             gas_reading = telegram[HOURLY_GAS_METER_READING]
 
-            is_new_gas_reading = not MeterManager().gas_tariff().readings\
+            is_new_gas_reading = not Meter.manager.gas_tariff().readings\
                 .filter(datetime__gte=gas_reading.datetime)\
                 .exists()
 
-            MeterManager().electricity_used().electricity_actual.create(
+            Meter.manager.electricity_used().electricity_actual.create(
                 datetime=message_datetime.value,
                 value=electricity_used_actual
             )
-            MeterManager().electricity_used_tariff(tariff).readings.create(
+            Meter.manager.electricity_used_tariff(tariff).readings.create(
                 datetime=message_datetime.value,
                 value_total=electricity_used_total.value
             )
 
             if electricity_delivered_total.value:
-                MeterManager().electricity_used().electricity_delivered.create(
+                Meter.manager.electricity_used().electricity_delivered.create(
                     datetime=message_datetime.value,
                     value=electricity_delivered_actual
                 )
-                MeterManager().electricity_delivered_tariff(tariff).readings.create(
+                Meter.manager.electricity_delivered_tariff(tariff).readings.create(
                     datetime=message_datetime.value,
                     value_total=electricity_delivered_total.value
                 )
 
             if is_new_gas_reading:
-                MeterManager().gas_tariff().readings.create(
+                Meter.manager.gas_tariff().readings.create(
                     value_total=gas_reading.value,
                     datetime=gas_reading.datetime
                 )
