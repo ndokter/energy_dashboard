@@ -4,7 +4,7 @@ var app = app || {};
 (function ($) {
 	'use strict';
 
-    app.GasUsedCollection = Backbone.Collection.extend({
+    app.ElectricityUsedActualCollection = Backbone.Collection.extend({
         initialize: function(start, end, aggregation) {
             this.start = start;
             this.end = end;
@@ -15,7 +15,7 @@ var app = app || {};
             let start = this.start.utc().format('YYYY-MM-DD HH:mm:ss'),
                 end = this.end.utc().format('YYYY-MM-DD HH:mm:ss');
 
-            return '/api/readings/gas/usage/total/' + this.aggregation + '/' + '?datetime_start=' + start + '&datetime_end=' + end;
+            return '/api/readings/electricity/usage/actual/' + this.aggregation + '/' + '?datetime_start=' + start + '&datetime_end=' + end;
         }
     });
 })(jQuery);

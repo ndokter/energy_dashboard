@@ -64,7 +64,7 @@ var app = app || {};
                     }
 
                     that.chart = new Chart(canvas, {
-                        type: 'line',
+                        type: 'bar',
                         data: data
                     });
 

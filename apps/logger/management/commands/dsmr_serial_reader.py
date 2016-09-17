@@ -44,7 +44,7 @@ class Command(BaseCommand):
                 .filter(datetime__gte=gas_reading.datetime)\
                 .exists()
 
-            Meter.manager.electricity_used().electricity_actual.create(
+            Meter.manager.electricity_used().energy_actual.create(
                 datetime=message_datetime.value,
                 value=electricity_used_actual.value
             )
