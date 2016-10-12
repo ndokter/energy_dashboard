@@ -5,7 +5,7 @@ import pytz
 
 from django.test import TestCase
 
-from apps.logger.models.meter import Meter, MeterGroup
+from apps.logger.models.meter import Meter
 from apps.logger.models.reading import ReadingReportsQuerySet
 
 
@@ -14,13 +14,7 @@ class ReadingSaveCostsTestCase(TestCase):
     def setUp(self):
         self.tz = pytz.timezone('UTC')
 
-        self.meter_group = MeterGroup.objects.create(slug='test')
-
-        self.meter = Meter.objects.create(
-            meter_group=self.meter_group,
-            slug='test',
-            unit=Meter.UNIT_KWH
-        )
+        self.meter = Meter.manager.electricity_used_tariff(0)
 
         self.meter.prices.create(
             start=self.tz.localize(datetime.datetime(2015, 1, 1)),
@@ -113,13 +107,8 @@ class ReadingSaveCostsTestCase(TestCase):
         )
 
     def test_without_prices(self):
-        meter_group = MeterGroup.objects.create(slug='test-2')
-
-        meter = Meter.objects.create(
-            meter_group=meter_group,
-            slug='test',
-            unit=Meter.UNIT_KWH
-        )
+        # There are no prices defined for tariff 1
+        meter = Meter.manager.electricity_used_tariff(1)
 
         meter.readings.create(
             datetime=self.tz.localize(datetime.datetime(2015, 1, 1, 13, 0)),

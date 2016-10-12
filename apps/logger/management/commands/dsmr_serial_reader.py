@@ -40,31 +40,48 @@ class Command(BaseCommand):
 
             gas_reading = telegram[HOURLY_GAS_METER_READING]
 
-            is_new_gas_reading = not Meter.manager.gas_tariff().readings\
-                .filter(datetime__gte=gas_reading.datetime)\
-                .exists()
+            electricity_used_tariff = \
+                Meter.manager.electricity_used_tariff(tariff)
+            electricity_delivered_tariff = \
+                Meter.manager.electricity_delivered_tariff(tariff)
+            gas_tariff = Meter.manager.gas_tariff()
 
             Meter.manager.electricity_used().energy_actual.create(
                 datetime=message_datetime.value,
                 value=electricity_used_actual.value
             )
-            Meter.manager.electricity_used_tariff(tariff).readings.create(
-                datetime=message_datetime.value,
-                value_total=electricity_used_total.value
-            )
+
+            if _is_new_hourly_reading(electricity_used_tariff,
+                                      message_datetime.value):
+                electricity_used_tariff.readings.create(
+                    datetime=message_datetime.value,
+                    value_total=electricity_used_total.value
+                )
 
             if electricity_delivered_total.value:
-                Meter.manager.electricity_used().electricity_delivered.create(
+                Meter.manager.electricity_delivered().energy_actual.create(
                     datetime=message_datetime.value,
                     value=electricity_delivered_actual.value
                 )
-                Meter.manager.electricity_delivered_tariff(tariff).readings.create(
-                    datetime=message_datetime.value,
-                    value_total=electricity_delivered_total.value
-                )
 
-            if is_new_gas_reading:
-                Meter.manager.gas_tariff().readings.create(
+                if _is_new_hourly_reading(electricity_delivered_tariff,
+                                          message_datetime.value):
+                    electricity_delivered_tariff.readings.create(
+                        datetime=message_datetime.value,
+                        value_total=electricity_delivered_total.value
+                    )
+
+            if _is_new_hourly_reading(gas_tariff, gas_reading.datetime):
+                gas_tariff.readings.create(
                     value_total=gas_reading.value,
                     datetime=gas_reading.datetime
                 )
+
+
+def _is_new_hourly_reading(meter_tariff, reading_datetime):
+    reading_datetime = reading_datetime\
+        .replace(minute=0, second=0, microsecond=0)
+
+    return not meter_tariff.readings\
+        .filter(datetime__gte=reading_datetime)\
+        .exists()
