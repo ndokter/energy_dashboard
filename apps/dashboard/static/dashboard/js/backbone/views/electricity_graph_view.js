@@ -65,6 +65,15 @@ var app = app || {};
 
                     that.chart = new Chart(canvas, {
                         type: 'bar',
+                        options: {
+                            scales: {
+                                yAxes: [{
+                                    ticks: {
+                                        beginAtZero:true
+                                    }
+                                }]
+                            }
+                        },
                         data: data,
                     });
 
