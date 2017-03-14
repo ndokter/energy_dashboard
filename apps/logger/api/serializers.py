@@ -9,7 +9,7 @@ class ReadingSerializer(serializers.Serializer):
                                      max_digits=9, decimal_places=4)
 
 
-class EnergyActualSerializer(serializers.Serializer):
+class ReadingActualSerializer(serializers.Serializer):
     datetime = serializers.CharField(source='datetime__aggregate')
     value = serializers.DecimalField(source='value__avg',
                                      max_digits=8, decimal_places=3)

@@ -6,7 +6,7 @@ import pytz
 from django.test import TestCase
 
 from apps.logger.models.meter import Meter
-from apps.logger.models.reading import ReadingReportsQuerySet
+from apps.logger.models.reading_total import ReadingReportsQuerySet
 
 
 class MeterGroupReadingsTestCase(TestCase):
@@ -29,31 +29,31 @@ class MeterGroupReadingsTestCase(TestCase):
             amount=0.50
         )
 
-        self.meter_tariff_1.readings.create(
+        self.meter_tariff_1.readings_total.create(
             datetime=self.tz.localize(datetime.datetime(2015, 1, 1)),
             value_total=Decimal('0')
         )
-        self.meter_tariff_1.readings.create(
+        self.meter_tariff_1.readings_total.create(
             datetime=self.tz.localize(datetime.datetime(2015, 1, 2)),
             value_total=Decimal('1')
         )
 
-        self.meter_tariff_2.readings.create(
+        self.meter_tariff_2.readings_total.create(
             datetime=self.tz.localize(datetime.datetime(2015, 1, 3)),
             value_total=Decimal('0')
         )
-        self.meter_tariff_2.readings.create(
+        self.meter_tariff_2.readings_total.create(
             datetime=self.tz.localize(datetime.datetime(2015, 1, 4)),
             value_total=Decimal('2')
         )
 
     def test(self):
-        result = self.meter.readings()
+        result = self.meter.readings_total()
 
         self.assertEqual(result.count(), 4)
 
     def test_datetime_aggregate(self):
-        result = self.meter.readings().datetime_aggregate(
+        result = self.meter.readings_total().datetime_aggregate(
             aggregate=ReadingReportsQuerySet.YEAR
         )
 

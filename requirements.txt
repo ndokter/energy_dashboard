@@ -1,5 +1,5 @@
-django==1.9.4
+django==1.9.12
 djangorestframework==3.3.3
 gunicorn==19.4.5
 django-filter==0.13
-dsmr-parser==0.3
+dsmr-parser==0.8

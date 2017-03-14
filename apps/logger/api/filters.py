@@ -2,8 +2,8 @@ import django_filters
 
 from rest_framework import filters
 
-from apps.logger.models import EnergyActual
-from apps.logger.models.reading import Reading
+from apps.logger.models import ReadingActual
+from apps.logger.models.reading_total import ReadingTotal
 
 
 class ReadingFilter(filters.FilterSet):
@@ -17,11 +17,11 @@ class ReadingFilter(filters.FilterSet):
     )
 
     class Meta:
-        model = Reading
+        model = ReadingTotal
         fields = ['datetime']
 
 
-class EnergyActualFilter(filters.FilterSet):
+class ReadingActualFilter(filters.FilterSet):
     datetime_start = django_filters.DateTimeFilter(
         name='datetime',
         lookup_expr='gte'
@@ -32,5 +32,5 @@ class EnergyActualFilter(filters.FilterSet):
     )
 
     class Meta:
-        model = EnergyActual
+        model = ReadingActual
         fields = ['datetime']

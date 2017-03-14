@@ -6,19 +6,19 @@ from apps.logger.models.datetime_aggregate_queryset import \
 from apps.logger.models.meter import Meter
 
 
-class EnergyActualQuerySet(DatetimeAggregateQuerySet):
+class ReadingActualQuerySet(DatetimeAggregateQuerySet):
 
     def datetime_aggregate(self, aggregate):
 
-        return super(EnergyActualQuerySet, self)\
+        return super(ReadingActualQuerySet, self)\
             .datetime_aggregate(aggregate) \
             .annotate(Avg('value'))
 
 
-class EnergyActual(models.Model):
-    objects = EnergyActualQuerySet.as_manager()
+class ReadingActual(models.Model):
+    objects = ReadingActualQuerySet.as_manager()
 
-    meter = models.ForeignKey(Meter, related_name='energy_actual')
+    meter = models.ForeignKey(Meter, related_name='readings_actual')
 
     datetime = models.DateTimeField()
     value = models.DecimalField(max_digits=8, decimal_places=3)

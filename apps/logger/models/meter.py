@@ -16,12 +16,12 @@ class MeterManager(models.Manager):
         return meter.tariffs.get_or_create(tariff=1)[0]
 
     def electricity_used_tariff(self, tariff):
-        meter = self.electricity_used()
+        meter = self.get_or_create(slug=Meter.SLUG_ELECTRICITY_USED)[0]
 
         return meter.tariffs.get_or_create(tariff=tariff)[0]
 
     def electricity_delivered_tariff(self, tariff):
-        meter = self.electricity_delivered()
+        meter = self.get_or_create(slug=Meter.SLUG_ELECTRICITY_DELIVERED)[0]
 
         return meter.tariffs.get_or_create(tariff=tariff)[0]
 
@@ -42,10 +42,10 @@ class Meter(models.Model):
 
     slug = models.CharField(max_length=50, choices=SLUG_CHOICES, unique=True)
 
-    def readings(self):
+    def readings_total(self):
         """
         A queryset for all meter readings that belong to this meter group.
         """
-        from apps.logger.models.reading import Reading
+        from apps.logger.models.reading_total import ReadingTotal
 
-        return Reading.objects.filter(meter_tariff__meter__pk=self.pk)
+        return ReadingTotal.objects.filter(meter_tariff__meter__pk=self.pk)

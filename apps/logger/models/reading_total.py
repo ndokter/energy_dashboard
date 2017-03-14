@@ -14,10 +14,10 @@ class ReadingReportsQuerySet(DatetimeAggregateQuerySet):
             .annotate(Sum('value_increment'), Sum('costs'))
 
 
-class Reading(models.Model):
+class ReadingTotal(models.Model):
     objects = ReadingReportsQuerySet.as_manager()
 
-    meter_tariff = models.ForeignKey(MeterTariff, related_name='readings')
+    meter_tariff = models.ForeignKey(MeterTariff, related_name='readings_total')
 
     datetime = models.DateTimeField()
     value_increment = models.DecimalField(max_digits=8, decimal_places=3)
@@ -29,7 +29,7 @@ class Reading(models.Model):
         index_together = ['meter_tariff', 'datetime']
 
     def save(self, **kwargs):
-        last_record = Reading.objects \
+        last_record = ReadingTotal.objects \
             .filter(
                 datetime__lt=self.datetime,
                 meter_tariff=self.meter_tariff
@@ -49,4 +49,4 @@ class Reading(models.Model):
         if price:
             self.costs = self.value_increment * price.amount
 
-        return super(Reading, self).save(**kwargs)
+        return super(ReadingTotal, self).save(**kwargs)
