@@ -1,11 +1,124 @@
+/* Header */
+header {
+    position: relative;
+    /*margin-bottom: 20px;*/
+    /*line-height: 28px;*/
+    padding: 12px;
+    background: #192835;
+    color: #ffffff;
+}
+    header a,
+    header a:active,
+    header a:visited,
+    header a:link,
+    header a:hover {
+        text-decoration: none;
+        color: #ffffff;
+    }
+    header .navbar-nav.main a:hover {
+        background: #264763;
+    }
+
+    header .logo {
+        float: left;
+    }
+        header .logo h1 {
+            font-size: 20px;
+            font-family: 'MontserratRegular', sans-serif;
+            margin: 0;
+            line-height: 28px;
+        }
+
+    header .user {
+        float: right;
+        line-height: 28px;
+    }
+
+    header .nav.main {
+        float: left;
+        margin-left: 25px;
+    }
+        header .nav.main a {
+            font-size: 20px;
+            padding: 14px 25px;
+            outline: none;
+        }
+
+/* Bootstrap */
+.glyphicon {
+    margin-right: 2px;
+    top: 2px;
+}
+.navbar-right {
+    margin-right: 0;
+}
+.thumbnail {
+    padding: 0;
+    border: 0;
+    margin-bottom: 0;
+    background-color: none;
+    border-radius: none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+.img-rounded {
+    border-radius: 3px;
+}
+
 button {
     outline: none !important;
 }
 
+/* Miscellaneous */
 .graph-loading {
     opacity: 0.6;
 }
 
+/* Dashboard */
+.dashboard {
+    margin-top: 20px;
+    width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Widget */
+.widget {
+    padding: 15px;
+    margin: 10px;
+    box-shadow: 2px 2px 3px 1px #eee;
+    border: 2px solid #eee;
+    float: left;
+}
+    .widget table {
+        height: 100%;
+        width: 100%;
+    }
+
+    .widget.widget-metric {
+        height: 170px;
+        width: 230px;
+        position: relative;
+    }
+        .widget.widget-metric .title {
+            font-size: 17px;
+            position: absolute;
+            right: 20px;
+            top: 10px;
+        }
+        .widget.widget-metric .value {
+            font-size: 30px;
+            position: absolute;
+            bottom: 10px;
+            right: 20px;
+        }
+    .widget.widget-graph {
+        height: 170px;
+        width: 460px;
+        position: relative;
+    }
+
+/* TODO Widget: graph-wrapper*/
 .energy-graph-wrapper {
     margin: 10px;
 }

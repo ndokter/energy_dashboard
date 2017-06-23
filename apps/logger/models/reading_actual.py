@@ -9,7 +9,6 @@ from apps.logger.models.meter import Meter
 class ReadingActualQuerySet(DatetimeAggregateQuerySet):
 
     def datetime_aggregate(self, aggregate):
-
         return super(ReadingActualQuerySet, self)\
             .datetime_aggregate(aggregate) \
             .annotate(Avg('value'))

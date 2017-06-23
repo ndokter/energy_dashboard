@@ -20,6 +20,6 @@ class DatetimeAggregateQuerySet(models.QuerySet):
 
     def datetime_aggregate(self, aggregate):
         return self\
-            .extra(select={'datetime__aggregate': self.AGGREGATES[aggregate]}) \
-            .values('datetime__aggregate') \
-            .order_by('datetime__aggregate')
+            .extra(select={'datetime': self.AGGREGATES[aggregate]}) \
+            .values('datetime') \
+            .order_by()

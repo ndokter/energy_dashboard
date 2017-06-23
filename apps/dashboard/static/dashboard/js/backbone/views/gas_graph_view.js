@@ -65,16 +65,16 @@ var app = app || {};
 
                     that.chart = new Chart(canvas, {
                         type: 'bar',
+                        data: data,
                         options: {
                             scales: {
                                 yAxes: [{
                                     ticks: {
-                                        beginAtZero:true
+                                        beginAtZero:true,
                                     }
                                 }]
                             }
-                        },
-                        data: data
+                        }
                     });
 
                     that.$el.removeClass('graph-loading');

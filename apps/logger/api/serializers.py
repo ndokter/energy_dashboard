@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 
 class ReadingSerializer(serializers.Serializer):
-    datetime = serializers.CharField(source='datetime__aggregate')
+    datetime = serializers.CharField()
     value = serializers.DecimalField(source='value_increment__sum',
                                      max_digits=8, decimal_places=3)
     costs = serializers.DecimalField(source='costs__sum',
@@ -10,6 +10,6 @@ class ReadingSerializer(serializers.Serializer):
 
 
 class ReadingActualSerializer(serializers.Serializer):
-    datetime = serializers.CharField(source='datetime__aggregate')
+    datetime = serializers.CharField()
     value = serializers.DecimalField(source='value__avg',
                                      max_digits=8, decimal_places=3)

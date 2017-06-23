@@ -4,21 +4,26 @@ var app = app || {};
 (function ($) {
 	'use strict';
 
-    app.ElectricityGraphView = Backbone.View.extend({
+    app.ElectricityActualView = Backbone.View.extend({
         tagName: 'canvas',
 
         initialize: function() {
             this.chart = null;
+
+            this.end = moment()
+            this.start = this.end.subtract(15, 'minutes')
+            this.start = moment().startOf('hour');
+            this.end = moment(this.start).endOf('hour');
         },
 
-        render: function(start, end, aggregation, dataType) {
-            this.renderChart(start, end, aggregation, dataType);
+        render: function() {
+            this.renderChart(this.start, this.end, 'second');
 
             return this;
         },
 
-        renderChart: function(start, end, aggregation, dataType) {
-            let electricityUsedCollection = new app.ElectricityUsedCollection(start, end, aggregation),
+        renderChart: function(start, end, aggregation) {
+            let electricityUsedCollection = new app.ElectricityUsedActualCollection(start, end, aggregation),
                 canvas = $(this.el),
                 dateFormat,
                 that = this;
@@ -42,11 +47,9 @@ var app = app || {};
                     electricityUsedCollection.each(function (item, index, all) {
                         dataLabels.push(moment.utc(item.attributes.datetime).local().format(dateFormat));
 
-                        if (dataType == 'costs') {
-                            dataPoints.push(item.attributes.costs);
-                        } else if (dataType == 'usage') {
-                            dataPoints.push(item.attributes.value);
-                        }
+
+                            dataPoints.push(item.attributes.value * 1000);
+
                     });
 
                     data = {

@@ -1,4 +1,5 @@
 from rest_framework import generics
+from rest_framework.filters import OrderingFilter, DjangoFilterBackend
 
 from apps.logger.api.filters import ReadingFilter, ReadingActualFilter
 from apps.logger.api.serializers import ReadingSerializer, \
@@ -9,6 +10,8 @@ from apps.logger.models.meter import Meter
 class ReadingElectricityUsedView(generics.ListAPIView):
     serializer_class = ReadingSerializer
     filter_class = ReadingFilter
+    filter_backends = (DjangoFilterBackend, OrderingFilter)
+    ordering_fields = ('datetime',)
 
     def get_queryset(self):
         meter = Meter.objects.get(slug=Meter.SLUG_ELECTRICITY_USED)
@@ -21,6 +24,8 @@ class ReadingElectricityUsedView(generics.ListAPIView):
 class ReadingElectricityDeliveredView(generics.ListAPIView):
     serializer_class = ReadingSerializer
     filter_class = ReadingFilter
+    filter_backends = (DjangoFilterBackend, OrderingFilter)
+    ordering_fields = ('datetime',)
 
     def get_queryset(self):
         meter = Meter.objects.get(slug=Meter.SLUG_ELECTRICITY_DELIVERED)
@@ -33,6 +38,8 @@ class ReadingElectricityDeliveredView(generics.ListAPIView):
 class ElectricityActualUsageView(generics.ListAPIView):
     serializer_class = ReadingActualSerializer
     filter_class = ReadingActualFilter
+    filter_backends = (DjangoFilterBackend, OrderingFilter)
+    ordering_fields = ('datetime',)
 
     def get_queryset(self):
         meter = Meter.objects.get(slug=Meter.SLUG_ELECTRICITY_USED)
@@ -45,6 +52,8 @@ class ElectricityActualUsageView(generics.ListAPIView):
 class ElectricityActualDeliveryView(generics.ListAPIView):
     serializer_class = ReadingActualSerializer
     filter_class = ReadingActualFilter
+    filter_backends = (DjangoFilterBackend, OrderingFilter)
+    ordering_fields = ('datetime',)
 
     def get_queryset(self):
         meter = Meter.objects.get(slug=Meter.SLUG_ELECTRICITY_DELIVERED)
@@ -57,6 +66,8 @@ class ElectricityActualDeliveryView(generics.ListAPIView):
 class ReadingGasUsedView(generics.ListAPIView):
     serializer_class = ReadingSerializer
     filter_class = ReadingFilter
+    filter_backends = (DjangoFilterBackend, OrderingFilter)
+    ordering_fields = ('datetime',)
 
     def get_queryset(self):
         meter = Meter.objects.get(slug=Meter.SLUG_GAS)

@@ -4,154 +4,47 @@ var app = app || {};
 	'use strict';
 
 	app.AppView = Backbone.View.extend({
-        el: $('body'),
-        template: _.template($('#energy-graph-wrapper-template').html()),
+        el: 'body',
+        template: _.template($('#index-template').html()),
+
+        // TODO: use url routing, this was a quickfix
+        events: {
+            'click #home'       : 'renderDashboard',
+            'click #reports'    : 'renderReports',
+        },
 
         initialize: function() {
-            this.period = 'hours';
-            this.aggregation = 'hour';
-            this.dataType = 'costs'
-
-            this.start = moment().startOf('day');
-            this.end = moment(this.start).endOf('day');
-
-            this.electricityUsedView = new app.ElectricityGraphView();
-            this.gasUsedView = new app.GasGraphView();
+//            this.dashboardView = new app.DashboardView();
+//            this.reportView = new app.ReportView();
 
             this.render();
         },
 
-        events: {
-            'click .date-period button'    : 'changePeriod',
-            'click .next-date'             : 'nextDate',
-            'click .previous-date'         : 'previousDate',
-            'click .data-type button'      : 'changeDataType',
+        renderDashboard: function(e) {
+            $('#body', this.$el).html(new app.DashboardView().el);
         },
 
-        changePeriod: function(e) {
-            let target = $(e.target, this.$el);
-
-            this.period = target.data('period')
-
-            // Redetermine what button is highlighted as 'active'.
-            $('.date-period button', this.$el).removeClass('active');
-            target.addClass('active');
-
-            if (this.period == 'hours') {
-                this.start = moment().local().startOf('day');
-                this.end = moment(this.start).endOf('day');
-                this.aggregation = 'hour';
-            } else if (this.period == 'days') {
-                this.start = moment().local().startOf('month');
-                this.end = moment(this.start).endOf('month');
-                this.aggregation = 'day';
-            } else if (this.period == 'months') {
-                this.start = moment().local().startOf('year');
-                this.end = moment(this.start).endOf('year');
-                this.aggregation = 'month';
-            }
-
-            this.renderCurrentDate();
-            this.renderGraphs();
+        renderReports: function(e) {
+            $('#body', this.$el).html(new app.ReportView().el);
         },
-
-        nextDate: function() {
-            if (this.period == 'hours') {
-                this.start.local().add(1, 'day');
-                this.end = this.start.clone().endOf('day');
-            } else if (this.period == 'days') {
-                this.start.local().add(1, 'month');
-                this.end = this.start.clone().endOf('month');
-            } else if (this.period == 'months') {
-                this.start.local().add(1, 'year');
-                this.end = this.start.clone().endOf('year');
-            }
-
-            this.renderCurrentDate();
-            this.renderGraphs();
-        },
-
-        previousDate: function() {
-            if (this.period == 'hours') {
-                this.start.local().subtract(1, 'day');
-                this.end = moment(this.start).endOf('day');
-            } else if (this.period == 'days') {
-                this.start.local().subtract(1, 'month');
-                this.end = moment(this.start).endOf('month');
-            } else if (this.period == 'months') {
-                this.start.local().subtract(1, 'year');
-                this.end = moment(this.start).endOf('year');
-            }
-
-            this.renderCurrentDate();
-            this.renderGraphs();
-        },
-
-        changeDataType: function(e) {
-            let target = $(e.target, this.$el);
-
-            this.dataType = target.data('type')
-
-            // Redetermine what button is highlighted as 'active'.
-            $('.data-type button', this.$el).removeClass('active');
-            target.addClass('active');
-
-            this.renderCurrentDate();
-            this.renderGraphs();
-        },
-
 
 		render: function () {
 		    this.$el.html(this.template());
+//		    this.renderDashboard();
+//		    this.renderReports();
 
-            this.renderCurrentDate();
-            this.renderGraphs();
-		},
+            //tmp
+            $('#body', this.$el).append(new app.ReportView().el);
+//            $('#body', this.$el).append(new app.ElectricityActualView().el);
 
-        renderCurrentDate: function() {
-            let date = '';
-
-            if (this.period == 'hours') {
-                date = this.start.local().format('D MMMM');
-            } else if (this.period == 'days') {
-                date = this.start.local().format('MMMM YYYY');
-            } else if (this.period == 'months') {
-                date = this.start.local().format('YYYY');
-            }
-
-            $('.current-date', this.$el).html(date);
-        },
-
-		renderGraphs: function() {
-		    let panelBody = $(".panel-body", this.$el);
-
-
-		    panelBody.empty();
-
-		    // Wrap the canvas'es in a div which determines the chart size. This
-		    // is due to some difficulties with ChartJS:
-		    // https://github.com/chartjs/Chart.js/issues/56
-		    panelBody.append(
+            $('#body', this.$el).append(
                 $('<div/>').addClass('canvas-wrapper').append(
-                    this.electricityUsedView.render(
-                        this.start,
-                        this.end,
-                        this.aggregation,
-                        this.dataType
-                    ).$el
+                    new app.ElectricityActualView().render().$el
                 )
             );
 
-            panelBody.append(
-                $('<div/>').addClass('canvas-wrapper').append(
-                    this.gasUsedView.render(
-                        this.start,
-                        this.end,
-                        this.aggregation,
-                        this.dataType
-                    ).$el
-                )
-            );
+
+		    return this;
 		}
 	});
 })(jQuery);

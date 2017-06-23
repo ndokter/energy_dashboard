@@ -30,6 +30,7 @@ class ReadingActualFilter(filters.FilterSet):
         name='datetime',
         lookup_expr='lt'
     )
+    aggregation = django_filters.ChoiceFilter()
 
     class Meta:
         model = ReadingActual
