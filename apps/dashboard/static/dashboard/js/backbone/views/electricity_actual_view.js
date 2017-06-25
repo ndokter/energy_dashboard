@@ -10,8 +10,8 @@ var app = app || {};
         initialize: function() {
             this.chart = null;
 
-            this.end = moment()
-            this.start = this.end.subtract(60, 'minutes')
+            this.end = moment();
+            this.start = moment().subtract(60, 'minutes');
         },
 
         render: function() {
