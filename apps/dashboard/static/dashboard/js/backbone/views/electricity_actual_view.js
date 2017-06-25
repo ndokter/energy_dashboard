@@ -11,9 +11,7 @@ var app = app || {};
             this.chart = null;
 
             this.end = moment()
-            this.start = this.end.subtract(15, 'minutes')
-            this.start = moment().startOf('hour');
-            this.end = moment(this.start).endOf('hour');
+            this.start = this.end.subtract(60, 'minutes')
         },
 
         render: function() {
