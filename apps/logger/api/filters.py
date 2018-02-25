@@ -2,11 +2,11 @@ import django_filters
 
 from rest_framework import filters
 
-from apps.logger.models import ReadingActual
-from apps.logger.models.reading_total import ReadingTotal
+from apps.logger.models import MetricActual
+from apps.logger.models.metric_total import MetricTotal
 
 
-class ReadingFilter(filters.FilterSet):
+class MetricFilter(filters.FilterSet):
     datetime_start = django_filters.DateTimeFilter(
         name='datetime',
         lookup_expr='gte'
@@ -17,11 +17,11 @@ class ReadingFilter(filters.FilterSet):
     )
 
     class Meta:
-        model = ReadingTotal
+        model = MetricTotal
         fields = ['datetime']
 
 
-class ReadingActualFilter(filters.FilterSet):
+class MetricActualFilter(filters.FilterSet):
     datetime_start = django_filters.DateTimeFilter(
         name='datetime',
         lookup_expr='gte'
@@ -33,5 +33,5 @@ class ReadingActualFilter(filters.FilterSet):
     aggregation = django_filters.ChoiceFilter()
 
     class Meta:
-        model = ReadingActual
+        model = MetricActual
         fields = ['datetime']

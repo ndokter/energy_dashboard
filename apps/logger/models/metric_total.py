@@ -6,18 +6,18 @@ from apps.logger.models.datetime_aggregate_queryset import \
 from apps.logger.models.meter_tariff import MeterTariff
 
 
-class ReadingReportsQuerySet(DatetimeAggregateQuerySet):
+class MetricReportsQuerySet(DatetimeAggregateQuerySet):
 
     def datetime_aggregate(self, aggregate):
-        return super(ReadingReportsQuerySet, self)\
+        return super(MetricReportsQuerySet, self)\
             .datetime_aggregate(aggregate) \
             .annotate(Sum('value_increment'), Sum('costs'))
 
 
-class ReadingTotal(models.Model):
-    objects = ReadingReportsQuerySet.as_manager()
+class MetricTotal(models.Model):
+    objects = MetricReportsQuerySet.as_manager()
 
-    meter_tariff = models.ForeignKey(MeterTariff, related_name='readings_total', on_delete=models.PROTECT)
+    meter_tariff = models.ForeignKey(MeterTariff, related_name='metrics_total', on_delete=models.PROTECT)
 
     datetime = models.DateTimeField()
     value_increment = models.DecimalField(max_digits=8, decimal_places=3)
@@ -29,7 +29,7 @@ class ReadingTotal(models.Model):
         index_together = ['meter_tariff', 'datetime']
 
     def save(self, **kwargs):
-        last_record = ReadingTotal.objects \
+        last_record = MetricTotal.objects \
             .filter(
                 datetime__lt=self.datetime,
                 meter_tariff=self.meter_tariff
@@ -49,4 +49,4 @@ class ReadingTotal(models.Model):
         if price:
             self.costs = self.value_increment * price.amount
 
-        return super(ReadingTotal, self).save(**kwargs)
+        return super(MetricTotal, self).save(**kwargs)

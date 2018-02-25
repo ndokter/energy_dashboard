@@ -1,5 +1,5 @@
-from .reading_actual import ReadingActual
+from .metric_actual import MetricActual
 from .meter import Meter, MeterManager
 from .meter_tariff import MeterTariff
 from .meter_tariff_price import MeterTariffPrice
-from .reading_total import ReadingTotal
+from .metric_total import MetricTotal

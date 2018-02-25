@@ -42,10 +42,10 @@ class Meter(models.Model):
 
     slug = models.CharField(max_length=50, choices=SLUG_CHOICES, unique=True)
 
-    def readings_total(self):
+    def metrics_total(self):
         """
-        A queryset for all meter readings that belong to this meter group.
+        A queryset for all meter metrics that belong to this meter group.
         """
-        from apps.logger.models.reading_total import ReadingTotal
+        from apps.logger.models.metric_total import MetricTotal
 
-        return ReadingTotal.objects.filter(meter_tariff__meter__pk=self.pk)
+        return MetricTotal.objects.filter(meter_tariff__meter__pk=self.pk)

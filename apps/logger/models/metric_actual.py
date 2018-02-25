@@ -6,18 +6,18 @@ from apps.logger.models.datetime_aggregate_queryset import \
 from apps.logger.models.meter import Meter
 
 
-class ReadingActualQuerySet(DatetimeAggregateQuerySet):
+class MetricActualQuerySet(DatetimeAggregateQuerySet):
 
     def datetime_aggregate(self, aggregate):
-        return super(ReadingActualQuerySet, self)\
+        return super(MetricActualQuerySet, self)\
             .datetime_aggregate(aggregate) \
             .annotate(Avg('value'))
 
 
-class ReadingActual(models.Model):
-    objects = ReadingActualQuerySet.as_manager()
+class MetricActual(models.Model):
+    objects = MetricActualQuerySet.as_manager()
 
-    meter = models.ForeignKey(Meter, related_name='readings_actual', on_delete=models.PROTECT)
+    meter = models.ForeignKey(Meter, related_name='metrics_actual', on_delete=models.PROTECT)
 
     datetime = models.DateTimeField()
     value = models.DecimalField(max_digits=8, decimal_places=3)

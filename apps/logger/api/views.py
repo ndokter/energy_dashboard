@@ -1,15 +1,15 @@
 from rest_framework import generics
 from rest_framework.filters import OrderingFilter, DjangoFilterBackend
 
-from apps.logger.api.filters import ReadingFilter, ReadingActualFilter
-from apps.logger.api.serializers import ReadingSerializer, \
-    ReadingActualSerializer
+from apps.logger.api.filters import MetricFilter, MetricActualFilter
+from apps.logger.api.serializers import MetricSerializer, \
+    MetricActualSerializer
 from apps.logger.models.meter import Meter
 
 
-class ReadingElectricityUsedView(generics.ListAPIView):
-    serializer_class = ReadingSerializer
-    filter_class = ReadingFilter
+class ElectricityUsedView(generics.ListAPIView):
+    serializer_class = MetricSerializer
+    filter_class = MetricFilter
     filter_backends = (DjangoFilterBackend, OrderingFilter)
     ordering_fields = ('datetime',)
 
@@ -17,13 +17,13 @@ class ReadingElectricityUsedView(generics.ListAPIView):
         meter = Meter.objects.get(slug=Meter.SLUG_ELECTRICITY_USED)
 
         return meter\
-            .readings_total()\
+            .metrics_total()\
             .datetime_aggregate(self.kwargs['aggregate'])
 
 
-class ReadingElectricityDeliveredView(generics.ListAPIView):
-    serializer_class = ReadingSerializer
-    filter_class = ReadingFilter
+class ElectricityDeliveredView(generics.ListAPIView):
+    serializer_class = MetricSerializer
+    filter_class = MetricFilter
     filter_backends = (DjangoFilterBackend, OrderingFilter)
     ordering_fields = ('datetime',)
 
@@ -31,13 +31,13 @@ class ReadingElectricityDeliveredView(generics.ListAPIView):
         meter = Meter.objects.get(slug=Meter.SLUG_ELECTRICITY_DELIVERED)
 
         return meter\
-            .readings_total()\
+            .metrics_total()\
             .datetime_aggregate(self.kwargs['aggregate'])
 
 
 class ElectricityActualUsageView(generics.ListAPIView):
-    serializer_class = ReadingActualSerializer
-    filter_class = ReadingActualFilter
+    serializer_class = MetricActualSerializer
+    filter_class = MetricActualFilter
     filter_backends = (DjangoFilterBackend, OrderingFilter)
     ordering_fields = ('datetime',)
 
@@ -45,13 +45,13 @@ class ElectricityActualUsageView(generics.ListAPIView):
         meter = Meter.objects.get(slug=Meter.SLUG_ELECTRICITY_USED)
 
         return meter\
-            .readings_actual\
+            .metrics_actual\
             .datetime_aggregate(self.kwargs['aggregate'])
 
 
 class ElectricityActualDeliveryView(generics.ListAPIView):
-    serializer_class = ReadingActualSerializer
-    filter_class = ReadingActualFilter
+    serializer_class = MetricActualSerializer
+    filter_class = MetricActualFilter
     filter_backends = (DjangoFilterBackend, OrderingFilter)
     ordering_fields = ('datetime',)
 
@@ -59,13 +59,13 @@ class ElectricityActualDeliveryView(generics.ListAPIView):
         meter = Meter.objects.get(slug=Meter.SLUG_ELECTRICITY_DELIVERED)
 
         return meter\
-            .readings_actual\
+            .metrics_actual\
             .datetime_aggregate(self.kwargs['aggregate'])
 
 
-class ReadingGasUsedView(generics.ListAPIView):
-    serializer_class = ReadingSerializer
-    filter_class = ReadingFilter
+class GasUsedView(generics.ListAPIView):
+    serializer_class = MetricSerializer
+    filter_class = MetricFilter
     filter_backends = (DjangoFilterBackend, OrderingFilter)
     ordering_fields = ('datetime',)
 
@@ -73,5 +73,5 @@ class ReadingGasUsedView(generics.ListAPIView):
         meter = Meter.objects.get(slug=Meter.SLUG_GAS)
 
         return meter\
-            .readings_total()\
+            .metrics_total()\
             .datetime_aggregate(self.kwargs['aggregate'])

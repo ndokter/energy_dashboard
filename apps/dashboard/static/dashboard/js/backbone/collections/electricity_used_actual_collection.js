@@ -19,7 +19,7 @@ var app = app || {};
                 url;
 
             // TODO Figure out proper way to apply filtering, ordering and limiting
-            url = '/api/readings/electricity/usage/actual/' + this.aggregation + '/' + '?datetime_start=' + start + '&datetime_end=' + end;
+            url = '/api/metrics/electricity/usage/actual/' + this.aggregation + '/' + '?datetime_start=' + start + '&datetime_end=' + end;
 
             if (this.ordering) {
                 url += '&ordering=' + this.ordering;

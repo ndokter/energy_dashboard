@@ -6,40 +6,40 @@ import pytz
 from django.test import TestCase
 
 from apps.logger.models.meter import Meter
-from apps.logger.models.reading_total import ReadingReportsQuerySet
+from apps.logger.models.metric_total import MetricReportsQuerySet
 
 
-class ReadingSaveValueIncrementTestCase(TestCase):
+class MetricSaveValueIncrementTestCase(TestCase):
 
     def setUp(self):
         self.tz = pytz.timezone('UTC')
 
         self.meter = Meter.manager.electricity_used_tariff(0)
 
-        self.meter.readings_total.create(
+        self.meter.metrics_total.create(
             datetime=self.tz.localize(datetime.datetime(2015, 1, 1, 13, 0)),
             value_total=Decimal('0')
         )
-        self.meter.readings_total.create(
+        self.meter.metrics_total.create(
             datetime=self.tz.localize(datetime.datetime(2015, 1, 1, 14, 0)),
             value_total=Decimal('0.5')
         )
-        self.meter.readings_total.create(
+        self.meter.metrics_total.create(
             datetime=self.tz.localize(datetime.datetime(2015, 1, 1, 15, 0)),
             value_total=Decimal('1')
         )
 
-        self.meter.readings_total.create(
+        self.meter.metrics_total.create(
             datetime=self.tz.localize(datetime.datetime(2015, 1, 2, 13, 0)),
             value_total=Decimal('1.5')
         )
-        self.meter.readings_total.create(
+        self.meter.metrics_total.create(
             datetime=self.tz.localize(datetime.datetime(2015, 1, 2, 14, 0)),
             value_total=Decimal('2')
         )
 
     def test_single_day(self):
-        result = self.meter.readings_total\
+        result = self.meter.metrics_total\
             .filter(
                 datetime__range=[
                     self.tz.localize(datetime.datetime(2015, 1, 1)),
@@ -60,8 +60,8 @@ class ReadingSaveValueIncrementTestCase(TestCase):
         )
 
     def test_total(self):
-        result = self.meter.readings_total\
-            .datetime_aggregate(aggregate=ReadingReportsQuerySet.MONTH)
+        result = self.meter.metrics_total\
+            .datetime_aggregate(aggregate=MetricReportsQuerySet.MONTH)
 
         self.assertListEqual(
             list(result),

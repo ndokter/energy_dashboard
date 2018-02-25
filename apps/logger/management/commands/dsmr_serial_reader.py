@@ -38,7 +38,7 @@ class Command(BaseCommand):
             electricity_delivered_actual = \
                 telegram[CURRENT_ELECTRICITY_DELIVERY]
 
-            gas_reading = telegram[HOURLY_GAS_METER_READING]
+            gas_metric = telegram[HOURLY_GAS_METER_READING]
 
             electricity_used_tariff = \
                 Meter.manager.electricity_used_tariff(tariff)
@@ -46,42 +46,42 @@ class Command(BaseCommand):
                 Meter.manager.electricity_delivered_tariff(tariff)
             gas_tariff = Meter.manager.gas_tariff()
 
-            Meter.manager.electricity_used().readings_actual.create(
+            Meter.manager.electricity_used().metrics_actual.create(
                 datetime=message_datetime.value,
                 value=electricity_used_actual.value
             )
 
-            if _is_new_hourly_reading(electricity_used_tariff,
+            if _is_new_hourly_metric(electricity_used_tariff,
                                       message_datetime.value):
-                electricity_used_tariff.readings_total.create(
+                electricity_used_tariff.metrics_total.create(
                     datetime=message_datetime.value,
                     value_total=electricity_used_total.value
                 )
 
             if electricity_delivered_total.value:
-                Meter.manager.electricity_delivered().readings_actual.create(
+                Meter.manager.electricity_delivered().metrics_actual.create(
                     datetime=message_datetime.value,
                     value=electricity_delivered_actual.value
                 )
 
-                if _is_new_hourly_reading(electricity_delivered_tariff,
+                if _is_new_hourly_metric(electricity_delivered_tariff,
                                           message_datetime.value):
-                    electricity_delivered_tariff.readings_total.create(
+                    electricity_delivered_tariff.metrics_total.create(
                         datetime=message_datetime.value,
                         value_total=electricity_delivered_total.value
                     )
 
-            if _is_new_hourly_reading(gas_tariff, gas_reading.datetime):
-                gas_tariff.readings_total.create(
-                    value_total=gas_reading.value,
-                    datetime=gas_reading.datetime
+            if _is_new_hourly_metric(gas_tariff, gas_metric.datetime):
+                gas_tariff.metrics_total.create(
+                    value_total=gas_metric.value,
+                    datetime=gas_metric.datetime
                 )
 
 
-def _is_new_hourly_reading(meter_tariff, reading_datetime):
-    reading_datetime = reading_datetime\
+def _is_new_hourly_metric(meter_tariff, metric_datetime):
+    metric_datetime = metric_datetime\
         .replace(minute=0, second=0, microsecond=0)
 
-    return not meter_tariff.readings_total\
-        .filter(datetime__gte=reading_datetime)\
+    return not meter_tariff.metrics_total\
+        .filter(datetime__gte=metric_datetime)\
         .exists()

@@ -6,10 +6,10 @@ import pytz
 from django.test import TestCase
 
 from apps.logger.models.meter import Meter
-from apps.logger.models.reading_total import ReadingReportsQuerySet
+from apps.logger.models.metric_total import MetricReportsQuerySet
 
 
-class MeterGroupReadingsTestCase(TestCase):
+class MeterGroupMetricsTestCase(TestCase):
 
     def setUp(self):
         self.tz = pytz.timezone('UTC')
@@ -29,32 +29,32 @@ class MeterGroupReadingsTestCase(TestCase):
             amount=0.50
         )
 
-        self.meter_tariff_1.readings_total.create(
+        self.meter_tariff_1.metrics_total.create(
             datetime=self.tz.localize(datetime.datetime(2015, 1, 1)),
             value_total=Decimal('0')
         )
-        self.meter_tariff_1.readings_total.create(
+        self.meter_tariff_1.metrics_total.create(
             datetime=self.tz.localize(datetime.datetime(2015, 1, 2)),
             value_total=Decimal('1')
         )
 
-        self.meter_tariff_2.readings_total.create(
+        self.meter_tariff_2.metrics_total.create(
             datetime=self.tz.localize(datetime.datetime(2015, 1, 3)),
             value_total=Decimal('0')
         )
-        self.meter_tariff_2.readings_total.create(
+        self.meter_tariff_2.metrics_total.create(
             datetime=self.tz.localize(datetime.datetime(2015, 1, 4)),
             value_total=Decimal('2')
         )
 
     def test(self):
-        result = self.meter.readings_total()
+        result = self.meter.metrics_total()
 
         self.assertEqual(result.count(), 4)
 
     def test_datetime_aggregate(self):
-        result = self.meter.readings_total().datetime_aggregate(
-            aggregate=ReadingReportsQuerySet.YEAR
+        result = self.meter.metrics_total().datetime_aggregate(
+            aggregate=MetricReportsQuerySet.YEAR
         )
 
         self.assertListEqual(
