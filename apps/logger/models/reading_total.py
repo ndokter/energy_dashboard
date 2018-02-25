@@ -17,7 +17,7 @@ class ReadingReportsQuerySet(DatetimeAggregateQuerySet):
 class ReadingTotal(models.Model):
     objects = ReadingReportsQuerySet.as_manager()
 
-    meter_tariff = models.ForeignKey(MeterTariff, related_name='readings_total')
+    meter_tariff = models.ForeignKey(MeterTariff, related_name='readings_total', on_delete=models.PROTECT)
 
     datetime = models.DateTimeField()
     value_increment = models.DecimalField(max_digits=8, decimal_places=3)

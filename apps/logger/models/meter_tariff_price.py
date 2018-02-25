@@ -18,7 +18,7 @@ class MeterTariffPriceQuerySet(models.QuerySet):
 class MeterTariffPrice(models.Model):
     objects = MeterTariffPriceQuerySet.as_manager()
 
-    meter_tariff = models.ForeignKey(MeterTariff, related_name='prices')
+    meter_tariff = models.ForeignKey(MeterTariff, related_name='prices', on_delete=models.CASCADE)
 
     start = models.DateField()
     end = models.DateField()

@@ -17,7 +17,7 @@ class ReadingActualQuerySet(DatetimeAggregateQuerySet):
 class ReadingActual(models.Model):
     objects = ReadingActualQuerySet.as_manager()
 
-    meter = models.ForeignKey(Meter, related_name='readings_actual')
+    meter = models.ForeignKey(Meter, related_name='readings_actual', on_delete=models.PROTECT)
 
     datetime = models.DateTimeField()
     value = models.DecimalField(max_digits=8, decimal_places=3)
